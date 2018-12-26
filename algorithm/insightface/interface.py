@@ -10,6 +10,7 @@ import mxnet as mx
 import sys
 
 from gluonnlp.embedding.evaluation import CosineSimilarity
+from sklearn.neighbors import NearestNeighbors
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -141,16 +142,18 @@ class BaseEngine(object):
             cv2.rectangle(image, (box[0], box[1]),
                           (box[2], box[3]), (255, 0, 0), 2)
 
-            cv2.putText(image,'%s: %f' % (name, p),(box[0], box[3]), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2,cv2.LINE_AA)
+            cv2.putText(image, '%s: %f' % (
+                name, p), (box[0], box[3]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
         return image
+
 
 class CosineSimilarityEngine(BaseEngine):
     """通过余弦相似度进行人脸识别的引擎
     """
 
-    def __init__(self):
-        super(CosineSimilarityEngine, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(CosineSimilarityEngine, self).__init__(*args, **kwargs)
         self.cos_op = CosineSimilarity()
 
     def recognize(self, scaled_images):
@@ -184,13 +187,10 @@ class CosineSimilarityEngine(BaseEngine):
 
 class CosineVoteEngine(BaseEngine):
     """通过余弦相似度加投票的方法进行人脸识别
-
-    Args:
-        BaseEngine ([type]): [description]
     """
 
-    def __init__(self, top=5):
-        super(CosineVoteEngine, self).__init__()
+    def __init__(self, top=5, **kwargs):
+        super(CosineVoteEngine, self).__init__(**kwargs)
         self.cos_op = CosineSimilarity()
         self.top = top
 
@@ -234,3 +234,21 @@ class CosineVoteEngine(BaseEngine):
             probabilities.append(sorted_name[0][1])
 
         return names, probabilities
+
+
+class NearestNeighborsEngine(BaseEngine):
+
+    """使用sklean里面NearestNeighbors（基于kdtree或balltree）来计算与库中最相似的人脸 TODO
+    """
+
+    def __init__(self, **kwargs):
+        super(NearestNeighborsEngine, self).__init__(**kwargs)
+        self.nbrs = NearestNeighbors(n_neighbors=1).fit(self.feature_matrix.asnumpy())
+
+    def recognize(self, scaled_images):
+        """Hook implementation of super class
+        """
+        image_tensor = self.model.get_feature_tensor(scaled_images).asnumpy()
+        _, indices = self.nbrs.kneighbors(image_tensor)
+
+        pass
