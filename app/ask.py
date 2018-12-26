@@ -14,9 +14,6 @@ from app import BaseHandle
 from concurrent.futures import ThreadPoolExecutor
 from tornado.concurrent import run_on_executor
 
-from service_utils import clean_text
-from service_utils import utils
-from question_match import DialogueManager
 import logging
 
 # 基礎設定
@@ -38,7 +35,6 @@ console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 logger_nlu = logging.getLogger('交互日志')
 
-store_info = {}
 
 
 class ASK(BaseHandle):
