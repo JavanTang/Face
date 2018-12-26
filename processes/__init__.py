@@ -15,6 +15,7 @@ thismodule = sys.modules[__name__]
 
 
 def start_camera(camera_list,
+                 read_fps_interval,  # 每隔多少帧读取一次摄像头
                  tag,
                  queue):
 
@@ -22,7 +23,7 @@ def start_camera(camera_list,
 
     for i in camera_list:
         reader = CameraReader(
-            config.cameras[i], i, getattr(config, tag+'_fps_interval'), queue, tag)
+            i, i, read_fps_interval, queue, tag)
         reader.start()
         tasks.append(reader)
 
@@ -31,7 +32,11 @@ def start_camera(camera_list,
 
 
 def start_recognizer(engine_name,  # 人脸识别引擎名称
+                     face_database_path,  # 人脸库路径
+                     minsize,  # 最小人脸像素
+                     threshold,  # 人脸识别相似度阈值
                      recognizer_name,  # 进程类型名称
+                     pool_limit_time,  # 最小识别间隔 （对于部分识别器有用）
                      tag,  # tag
                      camera_queue,  # 接收摄像头读取图片的队列
                      data_queue,  # 存储识别结果的队列
@@ -40,8 +45,7 @@ def start_recognizer(engine_name,  # 人脸识别引擎名称
 
    # 获取人脸识别引擎对象
     engine = getattr(insightface, engine_name)(gpu_id=gpu_id)
-    engine.load_database(config.face_database_path,
-                         config.force_reload_dataset)
+    engine.load_database(face_database_path)
 
     if monitor_on:
         monitor_queue = db.Queue.get_by_name("RedisQueue", "monitor")
@@ -49,12 +53,9 @@ def start_recognizer(engine_name,  # 人脸识别引擎名称
         monitor_queue = None
 
     recognizer = getattr(thismodule, recognizer_name)(engine=engine,
-                                                      minsize=getattr(
-                                                          config, tag+'_min_size'),
-                                                      threshold=getattr(
-                                                          config, tag+'_threshold'),
-                                                      pool_limit_time=getattr(
-                                                          config, tag+'_pool_limit_time'),
+                                                      minsize=minsize,
+                                                      threshold=threshold,
+                                                      pool_limit_time=pool_limit_time,
                                                       shared_queue=camera_queue,
                                                       data_queue=data_queue,
                                                       tag=tag,
