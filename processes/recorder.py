@@ -41,6 +41,7 @@ class CameraReader(threading.Thread):
                 self.cap.release()
                 print('摄像头%d异常，释放后重连' % self.channel_id)
                 continue
+
             # Push frame in queue every "read_fps_interval" times.
             i += 1
             if i == self.read_fps_interval:
@@ -55,4 +56,5 @@ class CameraReader(threading.Thread):
                         channel_id=self.channel_id
                     )
                     self.queue.put(message)
+
                 i = 0
