@@ -1,5 +1,18 @@
 import json
 import tornado.web
+import logging
+
+# 基礎設定
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    handlers=[logging.FileHandler(os.path.abspath('.')+'/log/info', 'a+', 'utf-8'), ])
+
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
 class BaseHandle(tornado.web.RequestHandler):
 

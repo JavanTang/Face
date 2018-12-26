@@ -7,8 +7,6 @@ from tornado.web import Application
 from tornado.options import define
 from tornado.log import enable_pretty_logging
 
-from app import ask
-from app import debug
 def make_app():
     settings = {
         'cookie_secret':'asdfkljlkj2l382432lk',
@@ -16,8 +14,8 @@ def make_app():
         "login_url": "/api/v1/user/load"
     }
     application = Application([
-        (r'/rtsident/',ask.ASK),
-        (r'/writepermit/',debug.ShowDebug), # 显示调试信息
+        (r'/readpermit/',ask.ASK),    # 区分人员差异
+        (r'/writepermit/',debug.ShowDebug), # 接收redis可以操作 
     ],**settings)
     http_server = httpserver.HTTPServer(application)
     http_server.listen(8888)

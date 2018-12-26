@@ -1,0 +1,5 @@
+
+
+class WritePermiteCodeError(Exception):
+    pass
+
