@@ -56,6 +56,7 @@ class BaseRecognizer(threading.Thread):
                     processed_image = self.engine.visualize(frame, names, probabilities, boxes)
                     self.monitor_queue.put(processed_image, channel_id)
             except Exception:
+                print("Recogize error. Camera id: %d." % channel_id)
                 continue
 
             for img, name, p in zip(original_face_image, names, probabilities):
