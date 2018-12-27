@@ -14,3 +14,14 @@
 4. 处理一帧的数据,并将数据放入redis,在这里要判断是否可以放入redis.
 5. 暂停放入redis.
 6. 允许放入redis.
+
+## Config配置
+初始化一个进程管理模块需要进行以下配置
+
+Scence1
+- tag 标识
+- p_algorithm_num  算法模块进程数
+- algorithm_name 算法模块名称
+- algorithm_params 算法模块初始化参数
+- camera_reader_name 摄像头读取模块的名称
+- camera_reader_params 摄像头读取模块的参数
