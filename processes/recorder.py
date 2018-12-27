@@ -6,6 +6,7 @@ import time
 
 from .message import CameraMessage as Message
 
+
 class CameraReader(threading.Thread):
 
     def __init__(self, channel_ip, channel_id, read_fps_interval, queue, tag):
@@ -53,7 +54,8 @@ class CameraReader(threading.Thread):
                 else:
                     message = Message(
                         image=image,
-                        channel_id=self.channel_id
+                        channel_id=self.channel_id,
+                        tag=self.tag
                     )
                     self.queue.put(message)
 
@@ -92,6 +94,7 @@ class RecordOnRequest(threading.Thread):
 
             message = Message(
                 image=image,
-                channel_id=self.channel_id
+                channel_id=self.channel_id,
+                tag=self.tag
             )
             self.queue_out.put(message)
