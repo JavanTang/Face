@@ -16,7 +16,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.append(here)
 import deploy.face_model as face_model
-from utils import load_dataset
+from .utils import load_dataset
 
 
 class ModelParam(object):
