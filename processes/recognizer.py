@@ -3,15 +3,16 @@
 
 import time
 import threading
+from .utils import UnitTestDecorator
 
 
+@UnitTestDecorator
 class BaseRecognizer(threading.Thread):
 
     def __init__(self,
                  engine,
                  minsize,
                  threshold,
-                 pool_limit_time,
                  shared_queue,
                  data_queue,
                  tag,
@@ -21,7 +22,6 @@ class BaseRecognizer(threading.Thread):
         self.engine = engine
         self.minsize = minsize
         self.threshold = threshold
-        self.pool_limit_time = pool_limit_time
         self.queue = shared_queue
         self.data_queue = data_queue
         self.tag = tag
@@ -41,6 +41,9 @@ class BaseRecognizer(threading.Thread):
     def run(self):
         print("Gate Thread has been started.")
         while True:
+            # 如果当前模式为单元测试模式并且队列为空则程序返回， 此处不影响程序正常运行
+            if self.get_test_option() and self.queue.qsize() == 0:
+                break
 
             # Get the message from Queue
             msg = self.queue.get()
@@ -63,22 +66,26 @@ class BaseRecognizer(threading.Thread):
 
                 self.on_detect(channel_id, name)
 
-            params = {
-                "image_matrix": original_face_image,
-                'name': names,
-                'record_time': img_time,
-                'chanel_id': channel_id, 
-                'tag': tag
-            }
-            self.data_queue.put(params)
+            # 照片中没有人脸的时候不往队列里存储
+            if len(names) > 0:
+
+                params = {
+                    "image_matrix": original_face_image,
+                    'name': names,
+                    'record_time': img_time,
+                    'chanel_id': channel_id, 
+                    'tag': tag
+                }
+                self.data_queue.put(params)
 
 
 
 class RealTimeRecognizer(BaseRecognizer):
 
     def on_detect(self, channel_id, name):
-        print("摄像头%d检测到%s" % (channel_id, name))
-        pass
+        # 测试状况下不打印
+        if not self.get_test_option():
+            print("摄像头%d检测到%s" % (channel_id, name))
 
 
 class AbnormalRecognizer(BaseRecognizer):
