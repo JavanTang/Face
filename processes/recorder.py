@@ -5,7 +5,7 @@ import cv2
 import time
 
 from .message import CameraMessage as Message
-from .utils import UnitTestDecorator
+from utils.decorator import UnitTestDecorator
 
 
 @UnitTestDecorator

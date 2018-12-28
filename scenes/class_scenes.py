@@ -13,7 +13,7 @@ sys.path.append(source_root)
 import algorithm.insightface as insightface
 
 from processes import recognizer, recorder, queues
-from processes.utils import DebugPrintStackTrace
+from utils.decorator import DebugPrintStackTrace
 
 
 @DebugPrintStackTrace

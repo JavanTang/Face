@@ -3,7 +3,7 @@
 
 import time
 import threading
-from .utils import UnitTestDecorator
+from utils.decorator import UnitTestDecorator
 
 
 @UnitTestDecorator
