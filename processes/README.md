@@ -18,10 +18,6 @@
 ## Config配置
 初始化一个进程管理模块需要进行以下配置
 
-Scence1
+ScenesClassRoom
 - tag 标识
 - p_algorithm_num  算法模块进程数
-- algorithm_name 算法模块名称
-- algorithm_params 算法模块初始化参数
-- camera_reader_name 摄像头读取模块的名称
-- camera_reader_params 摄像头读取模块的参数
