@@ -86,7 +86,7 @@ class RealTimeRecognizer(BaseRecognizer):
         # 测试状况下不打印
         if not self.get_test_option():
             print("摄像头%d检测到%s" % (channel_id, name))
-
+            
 
 class AbnormalRecognizer(BaseRecognizer):
 
