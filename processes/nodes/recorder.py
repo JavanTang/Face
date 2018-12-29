@@ -54,8 +54,6 @@ class CameraReader(BaseNode):
                 self.cap = cv2.VideoCapture(channel_ip)
             res, image = self.cap.read()
             if res == False:
-                self.cap.release()
-                print('摄像头%d异常，释放后重连' % channel_id)
                 continue
 
             # Push frame in queue every "read_fps_interval" times.
