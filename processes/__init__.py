@@ -2,7 +2,7 @@
 '''
 
 import multiprocessing
-import queues
+from . import queues
 
 
 class Algorithm(object):
