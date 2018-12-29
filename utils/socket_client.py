@@ -2,7 +2,7 @@
 @Author: TangZhiFeng
 @Data: 2018-12-28 15:50:58 
 @LastEditors: TangZhiFeng
-@LastEditTime: 2018-12-28 16:01:58
+@LastEditTime: 2018-12-28 20:35:17
 @Description: 向socket service端发送请求
 '''
 import websocket
