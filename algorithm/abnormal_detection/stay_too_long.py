@@ -1,3 +1,4 @@
+import cv2
 import time
 import wave
 import pyaudio
@@ -45,7 +46,7 @@ def cos_sim(vector_a, vector_b):
     sim = 0.5 + 0.5 * cos
     return sim
 
-def stay_detect(cameraImg, before_last_time, all_people, cameraKey, sftp_obj, image_save_path):
+def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
 
     """
     异常逗留检测
@@ -53,10 +54,18 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey, sftp_obj, im
     :param before_last_time: 上一帧图片检测到的人脸信息
     :param all_people: 当前帧图片检测到的人脸信息
     :param cameraKey:  摄像头编号
-    :param sftp_obj: 远程传输文件的对象
-    :param image_save_path: 远程web节点的异常场景图片保存路径
-    :return:
+    :returns [
+              all_people_info：当前帧人脸信息更新起止时间后的信息
+              flag：是否报警的标志位，False代表未报警，True代表报警
+              base64_data：异常图片的base64编码，如果报警（flag为True）, 将参数cameraImg转成base64格式的编码返回，否则为''
+              image_id：图片编号，如果报警（flag为True）, 生成以时间戳编码的图片编号, 否则为0
+              cameraKey：摄像头编号
+            ]
     """
+
+    flag = False
+    image_id = 0
+    base64_data = ''
 
     if before_last_time == []:
         return all_people
@@ -98,14 +107,15 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey, sftp_obj, im
                     print('逗留报警')
                     alarming()
 
-                    # 联合调试的时候可能需要再改一下
-                    '''
-                    cv2.imwrite('stay_abnormal.jpg', cameraImg)
+                    # 报警，标志位变True
+                    flag = True
 
-                    # stay_abnormal.jpg上传到web节点指定目录下
-                    sftp_obj.upload_image_to_remote('stay_abnormal.jpg', os.path.join(image_save_path, str(int((time.time())) + '.jpg')))
+                    # 图片转base64
+                    cv2.imwrite('cluster_image.jpg', cameraImg)
+                    base64_data = image_to_base64('cluster_image.jpg')
 
-                    '''
+                    # image_id: 时间戳到秒
+                    image_id = str(int(time.time()))
 
                     people_info.append(new_embs[i])
                     people_info.append(time.time())
@@ -126,7 +136,7 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey, sftp_obj, im
 
             all_people_info.append(people_info)
 
-        return all_people_info
+        return all_people_info, flag, base64_data, image_id, cameraKey
 
 
 

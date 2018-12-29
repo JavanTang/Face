@@ -1,3 +1,4 @@
+import cv2
 import time
 import pyaudio
 import wave
@@ -80,7 +81,7 @@ def get_box_center(box_list):
 
     return box_center
 
-def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey, sftp_obj, image_save_path):
+def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
 
     """
     异常聚集检测
@@ -88,9 +89,18 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey, sftp
     :param before_last_time_cluster: 上一帧图片检测到的人脸信息
     :param all_people: 当前帧图片检测到的人脸信息
     :param cameraKey: 摄像头编号
-    :param sftp_obj: 远程传输文件的对象
-    :param image_save_path: 远程web节点的异常场景图片保存路径
+    :returns [
+              clusters_info: 当前帧人脸信息更新起止时间后的信息
+              flag: 是否报警的标志位，False代表未报警，True代表报警
+              base64_data: 异常图片的base64编码，如果报警（flag为True）, 将参数cameraImg转成base64格式的编码返回，否则为''
+              image_id: 图片编号，如果报警（flag为True）, 生成以时间戳编码的图片编号, 否则为0
+              cameraKey: 摄像头编号
+            ]
     """
+
+    flag = False
+    image_id = 0
+    base64_data = ''
 
     clusters = list()
     if before_last_time_cluster == []:
@@ -203,14 +213,15 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey, sftp
                         print('聚众报警')
                         alarming()
 
-                        # 联合调试的时候可能需要再改一下
-                        '''
-                        cv2.imwrite('cluster_abnormal.jpg', cameraImg)
+                        # 报警，标志位变True
+                        flag = True
 
-                        # 将cluster_abnormal.jpg上传到web节点指定目录下
-                        sftp_obj.upload_image_to_remote('cluster_abnormal.jpg', os.path.join(image_save_path, str(int((time.time())) + '.jpg')))
-                        
-                        '''
+                        # 图片转base64
+                        cv2.imwrite('cluster_image.jpg', cameraImg)
+                        base64_data = image_to_base64('cluster_image.jpg')
+
+                        # image_id: 时间戳到秒
+                        image_id = str(int(time.time()))
 
                         for k in range(len(cluster)):
                             first_appear_time = time.time()
@@ -238,4 +249,4 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey, sftp
                     before_count += 1
             if before_count == len(before_last_time_cluster):
                 clusters_info.append(cluster)
-        return clusters_info
+        return clusters_info, flag, base64_data, image_id, cameraKey
