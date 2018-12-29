@@ -4,7 +4,7 @@ import time
 import os
 
 from utils.decorator import UnitTestDecorator
-from algorithm import insightface
+from algorithm import insightface, abnormal_detection
 from processes.message import RecognizerMessage, CameraMessage
 
 from . import BaseNode
@@ -14,13 +14,13 @@ from . import BaseNode
 class BaseRecognizer(BaseNode):
 
     def init_node(self,
-                       engine_name,  # 人脸识别引擎名称
-                       face_database_path,  # 人脸库路径
-                       minsize,  # 最小人脸像素
-                       threshold,  # 人脸识别相似度阈值
-                       tag,  # tag
-                       gpu_ids  # 可用的gpu编号
-                       ):
+                  engine_name,  # 人脸识别引擎名称
+                  face_database_path,  # 人脸库路径
+                  minsize,  # 最小人脸像素
+                  threshold,  # 人脸识别相似度阈值
+                  tag,  # tag
+                  gpu_ids  # 可用的gpu编号
+                  ):
 
         self.engine_name = engine_name
         self.face_database_path = face_database_path
@@ -98,3 +98,30 @@ class RealTimeRecognizer(BaseRecognizer):
         # 测试状况下不打印
         if not self.get_test_option():
             print("摄像头%d检测到%s" % (channel_id, name))
+
+
+class AbnormalDetectionRecognizer(BaseRecognizer):
+
+    def _run_sigle_process(self, i):
+        print("Recognization node has been started.")
+
+        gpu_id = self.gpu_ids[i % len(self.gpu_ids)]
+        engine = getattr(insightface, self.engine_name)(gpu_id=gpu_id)
+        engine.load_database(self.face_database_path)
+
+        while True:
+            msg = self.q_in.get()
+            frame, channel_id, _ = msg.image, msg.channel_id, msg.record_time
+            try:
+                scaled_images, boxes, flag = engine.model.get_input(frame)
+                if not flag:
+                    continue
+                mx_image_tensor = engine.model.get_feature_tensor(
+                    scaled_images)
+                print("start detect abnormal")
+                abnormal_detection.detect_abnormal(
+                    frame, boxes, mx_image_tensor.asnumpy(), channel_id)
+            except Exception as e:
+                print(e)
+                continue
+            
