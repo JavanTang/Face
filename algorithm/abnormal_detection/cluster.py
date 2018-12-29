@@ -7,8 +7,13 @@ import numpy as np
 
 def alarming(wav_path):
 
+    """
+    播放报警音频
+    :param wav_path: 音频文件所在路径
+    """
+
     chunk = 1024
-    f = wave.open(wav_path,"rb")
+    f = wave.open(wav_path, "rb")
     p = pyaudio.PyAudio()
     stream = p.open(format=p.get_format_from_width(f.getsampwidth()),
                     channels=f.getnchannels(),
@@ -26,12 +31,14 @@ def alarming(wav_path):
     p.terminate()
 
 def cos_sim(vector_a, vector_b):
+
     """
     计算两个向量之间的余弦相似度
     :param vector_a: 向量 a
     :param vector_b: 向量 b
     :return: sim
     """
+
     vector_a = np.mat(vector_a)
     vector_b = np.mat(vector_b)
     num = float(vector_a * vector_b.T)
@@ -74,6 +81,16 @@ def get_box_center(box_list):
     return box_center
 
 def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey, sftp_obj, image_save_path):
+
+    """
+    异常聚集检测
+    :param cameraImg: 摄像头读取的当前帧的图片
+    :param before_last_time_cluster: 上一帧图片检测到的人脸信息
+    :param all_people: 当前帧图片检测到的人脸信息
+    :param cameraKey: 摄像头编号
+    :param sftp_obj: 远程传输文件的对象
+    :param image_save_path: 远程web节点的异常场景图片保存路径
+    """
 
     clusters = list()
     if before_last_time_cluster == []:
