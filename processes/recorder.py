@@ -29,7 +29,7 @@ class CameraReader(threading.Thread):
         self.queue = queue
         self.tag = tag
 
-    def run(self, max_times=-1):
+    def run(self):
         # 测试计数变量
         if self.get_test_option():
             count = 0

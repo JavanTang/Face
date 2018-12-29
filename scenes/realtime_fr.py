@@ -16,7 +16,7 @@ from processes import recognizer, recorder, queues
 from utils.decorator import DebugPrintStackTrace
 
 
-@DebugPrintStackTrace
+# @DebugPrintStackTrace
 def start_camera(recorder_name,  # recorder类型
                  camera_id_list,  # 摄像头id列表
                  camera_ip_list,   # 摄像头ip列表
@@ -31,6 +31,7 @@ def start_camera(recorder_name,  # recorder类型
     for i, ip in zip(camera_id_list, camera_ip_list):
         reader = getattr(recorder, 'CameraReader')(
             ip, i, read_fps_interval, queue, tag)
+        print('run')
         reader.start()
         tasks.append(reader)
 
@@ -38,7 +39,7 @@ def start_camera(recorder_name,  # recorder类型
         t.join()
 
 
-@DebugPrintStackTrace
+# @DebugPrintStackTrace
 def start_recognizer(engine_name,  # 人脸识别引擎名称
                      face_database_path,  # 人脸库路径
                      minsize,  # 最小人脸像素
@@ -60,17 +61,17 @@ def start_recognizer(engine_name,  # 人脸识别引擎名称
     else:
         monitor_queue = None
 
-    recognizer = getattr(thismodule, recognizer_name)(engine=engine,
+    r = getattr(recognizer, recognizer_name)(engine=engine,
                                                       minsize=minsize,
                                                       threshold=threshold,
                                                       shared_queue=camera_queue,
                                                       data_queue=data_queue,
                                                       tag=tag,
                                                       monitor_queue=monitor_queue)
-    recognizer.run()
+    r.run()
 
 
-class ScenesClassRoom(object):
+class ScenesRealTimeFaceRecognization(object):
 
     default_config = {
         'tag': 'class_room',
@@ -86,7 +87,7 @@ class ScenesClassRoom(object):
         'monitor_on': False,
 
         # Camera config
-        'recorder_name': 'RecordOnRequest',
+        'recorder_name': 'CameraReader',
         'camera_id_list': [0],
         'camera_ip_list': [os.path.join(here, '../database/cache/video_friday/4.avi')],
         'read_fps_interval': 40,
@@ -125,17 +126,20 @@ class ScenesClassRoom(object):
                 gpu_id
             ))
 
+        print("InsightFace prapared done. ")
         # wait for recognizers ready
         time.sleep(10)
 
         # 启动摄像头模块
         self.pool.apply_async(start_camera, args=(
+            self.config['recorder_name'],
             self.config['camera_id_list'],
             self.config['camera_ip_list'],
             self.config['read_fps_interval'],
             self.config['tag'],
             self.camrea_queue
         ))
+        print("Camera prapared done. ")
 
         self.pool.close()
         self.pool.join()
