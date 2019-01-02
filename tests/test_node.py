@@ -15,7 +15,7 @@ class TestNode(unittest.TestCase):
 
     def test_reader(self):
         reader = recorder.CameraReader()
-        reader.init_algorithm([os.path.join(source_path, 'database/cache/video_friday/4.avi')], [1], 200, 'test')
+        reader.init_node([os.path.join(source_path, 'database/cache/video_friday/4.avi')], [1], 200, 'test')
         reader.set_test_option_on()
         reader.run()
 

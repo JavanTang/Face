@@ -18,7 +18,7 @@ class CameraReader(BaseNode):
         kwargs['is_in'] = False
         super(CameraReader, self).__init__(*args, **kwargs)  # 　摄像头节点没有入口只有出口
 
-    def init_algorithm(self, channel_ips, channel_ids, read_fps_interval, tag):
+    def init_node(self, channel_ips, channel_ids, read_fps_interval, tag):
         """Init CameraReader
 
         Args:
