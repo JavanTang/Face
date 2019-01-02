@@ -14,7 +14,7 @@ class FrameDiff:
 
         if self.next_frame is None:
             self.next_frame = cur_frame
-            return False
+            return True
         else:
             self.cur_frame = cur_frame
 

@@ -12,6 +12,7 @@ sys.path.append(source_path)
 
 from processes.nodes import recorder
 from processes.nodes import recognizer
+from processes.nodes import diff_node
 
 
 class TestNode(unittest.TestCase):
@@ -38,7 +39,7 @@ class TestNode(unittest.TestCase):
         recog.put(msg)
         recog.set_test_option_on()
         recog.run()
-        
+
         time.sleep(2)
 
         ret = recog.get()
@@ -62,6 +63,22 @@ class TestNode(unittest.TestCase):
         while abn_detecter.q_out.qsize() > 0:
             msg = abn_detecter.get()
             print(msg)
+
+    def test_frame_diff(self):
+        differ = diff_node.FrameDiffNode()
+        differ.init_node()
+
+        for i in range(5):
+            frame = cv2.imread(os.path.join(
+                here, '../database/cache/test_picture.png'))
+            msg = differ.TOP(frame, 2, 'test')
+            differ.put(msg)
+
+        differ.set_test_option_on()
+        differ.run()
+
+        time.sleep(5)
+        assert differ.q_out.qsize() == 1
 
 
 if __name__ == "__main__":
