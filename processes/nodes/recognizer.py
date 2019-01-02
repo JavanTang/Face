@@ -4,7 +4,8 @@ import time
 import os
 
 from utils.decorator import UnitTestDecorator
-from algorithm import insightface, abnormal_detection
+from algorithm import insightface
+from algorithm import abnormal_detection
 from processes.message import RecognizerMessage, CameraMessage
 
 from . import BaseNode
@@ -105,7 +106,7 @@ class AbnormalDetectionRecognizer(BaseRecognizer):
     def _run_sigle_process(self, i):
         print("Recognization node has been started.")
 
-        def detect_abnormal(self, cameraImg, box, emb_array, cameraKey):
+        def detect_abnormal(cameraImg, box, emb_array, cameraKey):
             # 异常检测代码
             all_people = []
             for mini_index, mini_box in enumerate(box):
@@ -118,12 +119,10 @@ class AbnormalDetectionRecognizer(BaseRecognizer):
                 each_person.append(
                     [mini_box[0], mini_box[1], mini_box[2], mini_box[3]])
                 all_people.append(each_person)
-            self.before_last_time = self.Cluster.stay_detect(
+            self.before_last_time = abnormal_detection.stay_detect(
                 cameraImg, self.before_last_time, all_people, cameraKey)
-            self.before_last_time_cluster = self.Cluster.box_cluster(
+            self.before_last_time_cluster = abnormal_detection.box_cluster(
                 cameraImg, self.before_last_time_cluster, all_people, cameraKey)
-
-
 
         gpu_id = self.gpu_ids[i % len(self.gpu_ids)]
         engine = getattr(insightface, self.engine_name)(gpu_id=gpu_id)
@@ -139,9 +138,8 @@ class AbnormalDetectionRecognizer(BaseRecognizer):
                 mx_image_tensor = engine.model.get_feature_tensor(
                     scaled_images)
                 print("start detect abnormal")
-                abnormal_detection.detect_abnormal(
+                detect_abnormal(
                     frame, boxes, mx_image_tensor.asnumpy(), channel_id)
             except Exception as e:
                 print(e)
                 continue
-            

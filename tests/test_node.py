@@ -42,6 +42,9 @@ class TestNode(unittest.TestCase):
         ret = recog.get()
         print(ret)
 
+    def test_abnormal_detecter(self):
+        pass
+
 
 if __name__ == "__main__":
     unittest.main()
