@@ -3,6 +3,8 @@ import time
 from numpy import *
 import numpy as np
 
+from utils.image_base64 import image_to_base64
+
 
 def cos_sim(vector_a, vector_b):
 
@@ -189,7 +191,6 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
                         flag = True
 
                         # 图片转base64
-                        cv2.imwrite('cluster_image.jpg', cameraImg)
                         base64_data = image_to_base64('cluster_image.jpg')
 
                         # image_id: 时间戳到秒
