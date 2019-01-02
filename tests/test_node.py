@@ -1,6 +1,7 @@
 import sys
 import os
 import unittest
+import time
 import cv2
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -11,7 +12,6 @@ sys.path.append(source_path)
 
 from processes.nodes import recorder
 from processes.nodes import recognizer
-from processes.message import CameraMessage
 
 
 class TestNode(unittest.TestCase):
@@ -34,16 +34,34 @@ class TestNode(unittest.TestCase):
         frame = cv2.imread(os.path.join(
             here, '../database/cache/test_picture.png'))
 
-        msg = CameraMessage(frame, 2, 'test')
+        msg = recog.TOP(frame, 2, 'test')
         recog.put(msg)
         recog.set_test_option_on()
         recog.run()
+        
+        time.sleep(2)
 
         ret = recog.get()
         print(ret)
 
     def test_abnormal_detecter(self):
-        pass
+        abn_detecter = recognizer.AbnormalDetectionRecognizer()
+        abn_detecter.init_node()
+
+        for i in range(5):
+            frame = cv2.imread(os.path.join(
+                here, '../database/cache/test_picture.png'))
+            msg = abn_detecter.TOP(frame, 2, 'test')
+            abn_detecter.put(msg)
+
+        abn_detecter.set_test_option_on()
+        abn_detecter.run()
+
+        time.sleep(5)
+
+        while abn_detecter.q_out.qsize() > 0:
+            msg = abn_detecter.get()
+            print(msg)
 
 
 if __name__ == "__main__":

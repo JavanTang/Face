@@ -1,1 +1,1 @@
-from .interface import CosineSimilarityEngine, CosineVoteEngine
+from .interface import CosineSimilarityEngine, CosineVoteEngine, BaseEngine

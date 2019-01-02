@@ -2,11 +2,12 @@
 """
 import time
 import os
+import traceback
 
 from utils.decorator import UnitTestDecorator
 from algorithm import insightface
 from algorithm import abnormal_detection
-from processes.message import RecognizerMessage, CameraMessage
+from processes.message import RecognizerMessage, CameraMessage, AbnormalDetectionMessage
 
 from . import BaseNode
 
@@ -101,13 +102,39 @@ class RealTimeRecognizer(BaseRecognizer):
             print("摄像头%d检测到%s" % (channel_id, name))
 
 
-class AbnormalDetectionRecognizer(BaseRecognizer):
+@UnitTestDecorator
+class AbnormalDetectionRecognizer(BaseNode):
+
+    TOP = CameraMessage  # 上游节点需要传递的消息类
+    BOTTOM = RecognizerMessage  # 下游节点需要传递的消息类
+
+    def __init__(self, queue_type="ProcessingQueue"):
+        """该节点每个场景暂时只能开启一个
+        """
+
+        super(AbnormalDetectionRecognizer, self).__init__(
+            process_size=1, queue_type=queue_type)
+
+    default_params = {
+        'tag': "RealTimeRecognizer",
+        'gpu_ids': [0]
+    }
+
+    def init_node(self, **kwargs):
+        params = self.default_params.copy()
+        self.tag = params.get('tag')
+        self.gpu_ids = params.get('gpu_ids')
+        self.engine_name = "BaseEngine"
 
     def _run_sigle_process(self, i):
         print("Recognization node has been started.")
 
+        self.before_last_time = list()
+        self.before_last_time_cluster = list()
+
         def detect_abnormal(cameraImg, box, emb_array, cameraKey):
             # 异常检测代码
+
             all_people = []
             for mini_index, mini_box in enumerate(box):
                 each_person = list()
@@ -119,16 +146,26 @@ class AbnormalDetectionRecognizer(BaseRecognizer):
                 each_person.append(
                     [mini_box[0], mini_box[1], mini_box[2], mini_box[3]])
                 all_people.append(each_person)
-            self.before_last_time = abnormal_detection.stay_detect(
+
+            self.before_last_time, stay_flag, stay_base64_data, stay_image_id, stay_cameraKey = abnormal_detection.stay_detect(
                 cameraImg, self.before_last_time, all_people, cameraKey)
-            self.before_last_time_cluster = abnormal_detection.box_cluster(
+            self.before_last_time_cluster, box_flag, box_base64_data, box_image_id, box_cameraKey = abnormal_detection.box_cluster(
                 cameraImg, self.before_last_time_cluster, all_people, cameraKey)
+
+            stay_msg = AbnormalDetectionMessage(
+                'stay_too_long', stay_flag, stay_base64_data, stay_image_id, stay_cameraKey)
+            box_msg = AbnormalDetectionMessage(
+                'cluster', box_flag, box_base64_data, box_image_id, box_cameraKey)
+
+            return stay_msg, box_msg
 
         gpu_id = self.gpu_ids[i % len(self.gpu_ids)]
         engine = getattr(insightface, self.engine_name)(gpu_id=gpu_id)
-        engine.load_database(self.face_database_path)
 
         while True:
+            if self.get_test_option() and self.q_in.qsize() == 0:
+                break
+
             msg = self.q_in.get()
             frame, channel_id, _ = msg.image, msg.channel_id, msg.record_time
             try:
@@ -137,9 +174,14 @@ class AbnormalDetectionRecognizer(BaseRecognizer):
                     continue
                 mx_image_tensor = engine.model.get_feature_tensor(
                     scaled_images)
-                print("start detect abnormal")
-                detect_abnormal(
+                stay_msg, box_msg = detect_abnormal(
                     frame, boxes, mx_image_tensor.asnumpy(), channel_id)
-            except Exception as e:
-                print(e)
-                continue
+
+                if stay_msg.flag:
+                    self.q_out.put(stay_msg)
+
+                if box_msg.flag:
+                    self.q_out.put(box_msg)
+
+            except:
+                traceback.print_exc()
