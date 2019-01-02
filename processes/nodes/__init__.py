@@ -86,7 +86,7 @@ class BaseNode(object):
             pool = multiprocessing.Pool(self.process_size)
             for i in range(self.process_size):
                 pool.apply_async(
-                    self._run_single_process_debug_wrapper, args=(i))
+                    self._run_single_process_debug_wrapper, args=(i,))
 
             pool.close()
 
