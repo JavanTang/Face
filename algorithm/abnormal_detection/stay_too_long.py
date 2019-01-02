@@ -1,36 +1,9 @@
 import cv2
 import time
-import wave
-import pyaudio
 import numpy as np
 
-def alarming(wav_path):
-
-    """
-    播放报警音频
-    :param wav_path: 音频文件所在路径
-    """
-
-    chunk = 1024
-    f = wave.open(wav_path,"rb")
-    p = pyaudio.PyAudio()
-    stream = p.open(format=p.get_format_from_width(f.getsampwidth()),
-                    channels=f.getnchannels(),
-                    rate=f.getframerate(),
-                    output=True)
-    data = f.readframes(chunk)
-
-    while data != b'':
-        stream.write(data)
-        data = f.readframes(chunk)
-
-    stream.stop_stream()
-    stream.close()
-
-    p.terminate()
 
 def cos_sim(vector_a, vector_b):
-
     """
     计算两个向量之间的余弦相似度
     :param vector_a: 向量 a
@@ -46,8 +19,8 @@ def cos_sim(vector_a, vector_b):
     sim = 0.5 + 0.5 * cos
     return sim
 
-def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
 
+def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
     """
     异常逗留检测
     :param cameraImg: 摄像头读取的当前帧的图片
@@ -68,7 +41,7 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
     base64_data = ''
 
     if before_last_time == []:
-        return all_people
+        return all_people, False, None, None, None
     else:
         embs = list()
         first_appear_time = list()
@@ -105,7 +78,6 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
                 final_disappear_time = time.time()
                 if new_first_appear_time[i] - first_appear_time[max_index] > 2:
                     print('逗留报警')
-                    alarming()
 
                     # 报警，标志位变True
                     flag = True
@@ -137,10 +109,3 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
             all_people_info.append(people_info)
 
         return all_people_info, flag, base64_data, image_id, cameraKey
-
-
-
-
-
-
-

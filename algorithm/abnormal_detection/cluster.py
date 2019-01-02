@@ -1,35 +1,8 @@
 import cv2
 import time
-import pyaudio
-import wave
 from numpy import *
 import numpy as np
 
-
-def alarming(wav_path):
-
-    """
-    播放报警音频
-    :param wav_path: 音频文件所在路径
-    """
-
-    chunk = 1024
-    f = wave.open(wav_path, "rb")
-    p = pyaudio.PyAudio()
-    stream = p.open(format=p.get_format_from_width(f.getsampwidth()),
-                    channels=f.getnchannels(),
-                    rate=f.getframerate(),
-                    output=True)
-    data = f.readframes(chunk)
-
-    while data != b'':
-        stream.write(data)
-        data = f.readframes(chunk)
-
-    stream.stop_stream()
-    stream.close()
-
-    p.terminate()
 
 def cos_sim(vector_a, vector_b):
 
@@ -139,7 +112,7 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
                 c.append([first_appear_time, final_disappear_time, embs, box_center])
                 clusters.append(c)
 
-        return clusters
+        return clusters, False, None, None, None
     else:
 
         for people in all_people:
@@ -211,7 +184,6 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
 
                     if min(stay_time) > 0.2 and len(cluster) >= 2:
                         print('聚众报警')
-                        alarming()
 
                         # 报警，标志位变True
                         flag = True
