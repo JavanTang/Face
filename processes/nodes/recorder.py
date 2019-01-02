@@ -14,8 +14,9 @@ class CameraReader(BaseNode):
 
     BOTTOM = CameraMessage
 
-    def __init__(self):
-        super(CameraReader, self).__init__(is_in=False)  # 　摄像头节点没有入口只有出口
+    def __init__(self, *args, **kwargs):
+        kwargs['is_in'] = False
+        super(CameraReader, self).__init__(*args, **kwargs)  # 　摄像头节点没有入口只有出口
 
     def init_algorithm(self, channel_ips, channel_ids, read_fps_interval, tag):
         """Init CameraReader

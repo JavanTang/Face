@@ -1,6 +1,7 @@
 import multiprocessing
 import os
 import sys
+import traceback
 from .. import queues
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -41,6 +42,15 @@ class BaseNode(object):
 
         raise NotImplementedError
 
+    def _run_single_process_debug_wrapper(self, *args, **kwargs):
+        """多进程运行时程序报错打印错误信息
+        """
+
+        try:
+            self._run_sigle_process(*args, **kwargs)
+        except:
+            traceback.print_exc()
+
     def put(self, obj):
         if self.q_in is not None:
             self.q_in.put(obj)
@@ -69,13 +79,14 @@ class BaseNode(object):
 
         # 在当前进程运行
         elif self.process_size == 0:
-            self._run_sigle_process(0)
+            self._run_single_process_debug_wrapper(0)
 
         # 开启子进程运行
         else:
             pool = multiprocessing.Pool(self.process_size)
             for i in range(self.process_size):
-                pool.apply_async(self._run_sigle_process, args=(i))
+                pool.apply_async(
+                    self._run_single_process_debug_wrapper, args=(i))
 
             pool.close()
 
@@ -85,12 +96,13 @@ class BaseNode(object):
         """
         # 在当前进程运行
         if self.process_size == 0:
-            self._run_sigle_process(0)
+            self._run_single_process_debug_wrapper(0)
 
         # 开启子线程运行
         else:
             pool = multiprocessing.pool.ThreadPool(self.process_size)
             for i in range(self.process_size):
-                pool.apply_async(self._run_sigle_process, args=(i))
+                pool.apply_async(
+                    self._run_single_process_debug_wrapper, args=(i,))
 
             pool.close()
