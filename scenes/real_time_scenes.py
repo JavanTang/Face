@@ -19,7 +19,7 @@ class RealTimeRecognition(BaseEngineering):
 if __name__ == "__main__":
     rtr = RealTimeRecognition()
     camera = CameraReader()
-    camera.init_algorithm(['/home/tangzhifeng/Desktoavi'],[1],40,"123")
+    camera.init_node(['/home/tangzhifeng/Desktoavi'],[1],40,"123")
     camera.run()
     rtr.add_algorithems(camera)
     rtr.run()

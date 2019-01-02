@@ -86,13 +86,13 @@ class RealTimeRecognizer(BaseRecognizer):
         'minsize': 40,
         'threshold': 0.5,
         'tag': "RealTimeRecognizer",
-        'gpu_id': [0]
+        'gpu_ids': [0]
     }
 
     def init_node(self, **kwargs):
         params = self.default_params.copy()
         params.update(kwargs)
-        super(RealTimeRecognizer, self).init_node(**kwargs)
+        super(RealTimeRecognizer, self).init_node(**params)
 
     def on_detect(self, channel_id, name):
         # 测试状况下不打印
