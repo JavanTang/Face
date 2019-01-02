@@ -105,6 +105,26 @@ class AbnormalDetectionRecognizer(BaseRecognizer):
     def _run_sigle_process(self, i):
         print("Recognization node has been started.")
 
+        def detect_abnormal(self, cameraImg, box, emb_array, cameraKey):
+            # 异常检测代码
+            all_people = []
+            for mini_index, mini_box in enumerate(box):
+                each_person = list()
+                first_appear_time = time.time()
+                final_disappear_time = 0
+                each_person.append(emb_array[mini_index])
+                each_person.append(first_appear_time)
+                each_person.append(final_disappear_time)
+                each_person.append(
+                    [mini_box[0], mini_box[1], mini_box[2], mini_box[3]])
+                all_people.append(each_person)
+            self.before_last_time = self.Cluster.stay_detect(
+                cameraImg, self.before_last_time, all_people, cameraKey)
+            self.before_last_time_cluster = self.Cluster.box_cluster(
+                cameraImg, self.before_last_time_cluster, all_people, cameraKey)
+
+
+
         gpu_id = self.gpu_ids[i % len(self.gpu_ids)]
         engine = getattr(insightface, self.engine_name)(gpu_id=gpu_id)
         engine.load_database(self.face_database_path)
