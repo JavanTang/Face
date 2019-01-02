@@ -4,6 +4,7 @@ import pyaudio
 import wave
 from numpy import *
 import numpy as np
+from utils.image_base64 import image_to_base64
 
 
 def alarming(wav_path):
@@ -211,7 +212,6 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
 
                     if min(stay_time) > 0.2 and len(cluster) >= 2:
                         print('聚众报警')
-                        alarming()
 
                         # 报警，标志位变True
                         flag = True
@@ -249,4 +249,5 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
                     before_count += 1
             if before_count == len(before_last_time_cluster):
                 clusters_info.append(cluster)
+
         return clusters_info, flag, base64_data, image_id, cameraKey

@@ -3,6 +3,7 @@ import time
 import wave
 import pyaudio
 import numpy as np
+from utils.image_base64 import image_to_base64
 
 def alarming(wav_path):
 
@@ -105,7 +106,6 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
                 final_disappear_time = time.time()
                 if new_first_appear_time[i] - first_appear_time[max_index] > 2:
                     print('逗留报警')
-                    alarming()
 
                     # 报警，标志位变True
                     flag = True
