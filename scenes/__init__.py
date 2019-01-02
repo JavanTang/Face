@@ -1,17 +1,16 @@
-from .realtime_fr import ScenesRealTimeFaceRecognization
 '''
 @Author: TangZhiFeng
 @Data: 2018-12-28
 @LastEditors: TangZhiFeng
-@LastEditTime: 2018-12-29 15:59:42
-@Description: 应用工程算法基类
+@LastEditors: TangZhiFeng
+@LastEditTime: 2019-01-02 10:26:34
 '''
 import queue
-from processes.recorder import CameraReader
 import os
 import sys
 import random
 import _thread
+import threading
 current = os.path.dirname(__name__)
 project = os.path.dirname(current)
 
@@ -89,13 +88,19 @@ class BaseEngineering(object):
     def run(self):
         '''开始运行，运行方式是监听每一个算法的返回，用线程的方式。
         '''
+        print('listen starting...')
         def listen(index, algorithms_obj):
             while True:
+                # print(1)
+                # for i in range(1000000):
+                #     pass
                 data = algorithms_obj.get()
+                print(data)
                 self.algorithms_distribution(index+1, data)
         for i in range(len(self.algorithems)):
-            _thread.start_new_thread(list, self.algorithems[i])
-
+            _thread.start_new_thread(listen, (i,self.algorithems[i],))
+        while True:
+            pass
         
             
 
