@@ -14,6 +14,9 @@ class CameraMessage(object):
         self.record_time = time.time()
         self.tag = tag
 
+    def __str__(self):
+        return "Image shape: %s\nChannel_id: %s\nRecord_time: %s\nTag: %s." % (self.image.shape, self.channel_id, self.record_time, self.tag)
+
 
 class RecognizerMessage(object):
 
@@ -33,3 +36,6 @@ class RecognizerMessage(object):
         self.record_time = record_time
         self.chanel_id = chanel_id
         self.tag = tag
+
+    def __str__(self):
+        return "Face number: %s\nNames: %s\nRecord_time: %s\nChannel_id: %s. Tag: %s." % (len(self.image_matrix), self.names, self.record_time, self.chanel_id, self.tag)
