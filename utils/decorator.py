@@ -16,19 +16,3 @@ def UnitTestDecorator(obj):
     obj.get_test_option = get_test_option
     return obj
 
-
-def DebugPrintStackTrace(func):
-    """多进程运行时出错用于打印错误信息
-    """
-
-    def wrapper(*args, **kwargs):
-
-        try:
-            ret = func(*args, **kwargs)
-        except Exception:
-            msg = traceback.format_exc()
-            print(msg)
-
-        return ret
-
-    return wrapper
