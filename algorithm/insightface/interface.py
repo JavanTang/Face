@@ -171,7 +171,7 @@ class CosineSimilarityEngine(BaseEngine):
 
         Args:
             a (mx.NDArray):
-            b (mx.NDArray): 
+            b (mx.NDArray):
         """
 
         a_ = a.expand_dims(1).broadcast_axes(
@@ -209,7 +209,7 @@ class CosineVoteEngine(BaseEngine):
 
         Args:
             a (mx.NDArray):
-            b (mx.NDArray): 
+            b (mx.NDArray):
         """
 
         a_ = a.expand_dims(1).broadcast_axes(
@@ -265,5 +265,25 @@ class SVMClassificationEngine(BaseEngine):
     """使用sklean里面SVM分类器来计算与库中最相似的人脸
     """
 
-    def __init__(self, **kwargs):
-        super(SVMClassificationEngine, self).__init__(**kwargs)
+    def load_database(self, *args, **kwargs):
+        super(SVMClassificationEngine, self).load_database(*args, **kwargs)
+        self.feature_matrix = sklearn.preprocessing.normalize(
+            self.feature_matrix.asnumpy())
+
+        all_names = list(set(self.index2name))
+        self.name2label = {name: i for name, i in zip(
+            set(self.index2name), range(len(all_names)))}
+        self.label2name = {i: name for i, name in self.name2label.items()}
+
+        self.lables = np.array([self.name2label[n] for n in self.index2name])
+
+    def recognize(self, scaled_images):
+        """Hook implementation of super class
+        """
+        image_tensor = self.model.get_feature(scaled_images)
+        dist, indices = self.nbrs.kneighbors(image_tensor)
+        indices = np.squeeze(indices)
+        dist = np.squeeze(dist)
+
+        names = [self.index2name[i] for i in indices]
+        return names, dist
