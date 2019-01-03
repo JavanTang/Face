@@ -1,4 +1,6 @@
 import traceback
+import time
+from functools import wraps
 
 
 def UnitTestDecorator(obj):
@@ -16,3 +18,22 @@ def UnitTestDecorator(obj):
     obj.get_test_option = get_test_option
     return obj
 
+
+def excution_time(iteration_times):
+
+    def middle(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            ret = func(*args, **kwargs)
+            end_time = time.time()
+
+            total_time = end_time - start_time
+            avg_time = total_time / iteration_times
+
+            print("Total time cost this function %s is %f." %
+                  (func.__name__, total_time))
+            print("Avg time cost each opration is %f." % avg_time)
+            return ret
+        return wrapper
+    return middle

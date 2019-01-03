@@ -8,6 +8,8 @@ import numpy as np
 import cv2
 import mxnet as mx
 import sys
+import scipy
+import sklearn
 
 from gluonnlp.embedding.evaluation import CosineSimilarity
 from sklearn.neighbors import NearestNeighbors
@@ -241,14 +243,27 @@ class NearestNeighborsEngine(BaseEngine):
     """使用sklean里面NearestNeighbors（基于kdtree或balltree）来计算与库中最相似的人脸 TODO
     """
 
-    def __init__(self, **kwargs):
-        super(NearestNeighborsEngine, self).__init__(**kwargs)
-        self.nbrs = NearestNeighbors(n_neighbors=1).fit(self.feature_matrix.asnumpy())
+    def load_database(self, *args, **kwargs):
+        super(NearestNeighborsEngine, self).load_database(*args, **kwargs)
+        self.feature_matrix = sklearn.preprocessing.normalize(
+            self.feature_matrix.asnumpy())
+        self.nbrs = NearestNeighbors(n_neighbors=1).fit(self.feature_matrix)
 
     def recognize(self, scaled_images):
         """Hook implementation of super class
         """
-        image_tensor = self.model.get_feature_tensor(scaled_images).asnumpy()
-        _, indices = self.nbrs.kneighbors(image_tensor)
+        image_tensor = self.model.get_feature(scaled_images)
+        dist, indices = self.nbrs.kneighbors(image_tensor)
+        indices = np.squeeze(indices)
+        dist = np.squeeze(dist)
 
-        pass
+        names = [self.index2name[i] for i in indices]
+        return names, dist
+
+
+class SVMClassificationEngine(BaseEngine):
+    """使用sklean里面SVM分类器来计算与库中最相似的人脸
+    """
+
+    def __init__(self, **kwargs):
+        super(SVMClassificationEngine, self).__init__(**kwargs)
