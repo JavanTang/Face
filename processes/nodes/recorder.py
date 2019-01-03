@@ -46,12 +46,12 @@ class CameraReader(BaseNode):
 
         self.cap = cv2.VideoCapture(channel_ip)
         i = 0
-        print("Camera Thread %d has been started" % channel_id)
+        print("Camera Thread %s has been started" % channel_id)
         while True:
             if not self.cap.isOpened():
                 self.cap.release()
                 time.sleep(10)
-                print('摄像头%d断开，正在重连。' % (channel_id))
+                print('摄像头%s断开，正在重连。' % (channel_id))
                 self.cap = cv2.VideoCapture(channel_ip)
             res, image = self.cap.read()
             if res == False:

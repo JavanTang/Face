@@ -63,7 +63,7 @@ class BaseRecognizer(BaseNode):
                     frame, p_threshold=self.threshold, min_size=self.minsize)
 
             except Exception:
-                print("Recogize error. Camera id: %d." % channel_id)
+                print("Recogize error. Camera id: %s." % channel_id)
                 continue
 
             for _, name, _ in zip(original_face_image, names, probabilities):
@@ -99,7 +99,7 @@ class RealTimeRecognizer(BaseRecognizer):
     def on_detect(self, channel_id, name):
         # 测试状况下不打印
         if not self.get_test_option():
-            print("摄像头%d检测到%s" % (channel_id, name))
+            print("摄像头%s检测到%s" % (channel_id, name))
 
 
 @UnitTestDecorator

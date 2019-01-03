@@ -20,7 +20,7 @@ class TestNode(unittest.TestCase):
     def test_reader(self):
         reader = recorder.CameraReader()
         reader.init_node([os.path.join(
-            source_path, 'database/cache/video_friday/4.avi')], [1], 200, 'test')
+            source_path, 'database/cache/video_friday/4.avi')], ['1'], 200, 'test')
         reader.set_test_option_on()
         reader.run()
 
@@ -35,7 +35,7 @@ class TestNode(unittest.TestCase):
         frame = cv2.imread(os.path.join(
             here, '../database/cache/test_picture.png'))
 
-        msg = recog.TOP(frame, 2, 'test')
+        msg = recog.TOP(frame, '2', 'test')
         recog.put(msg)
         recog.set_test_option_on()
         recog.run()
@@ -52,7 +52,7 @@ class TestNode(unittest.TestCase):
         for i in range(5):
             frame = cv2.imread(os.path.join(
                 here, '../database/cache/test_picture.png'))
-            msg = abn_detecter.TOP(frame, 2, 'test')
+            msg = abn_detecter.TOP(frame, '2', 'test')
             abn_detecter.put(msg)
 
         abn_detecter.set_test_option_on()
@@ -71,7 +71,7 @@ class TestNode(unittest.TestCase):
         for i in range(5):
             frame = cv2.imread(os.path.join(
                 here, '../database/cache/test_picture.png'))
-            msg = differ.TOP(frame, 2, 'test')
+            msg = differ.TOP(frame, '2', 'test')
             differ.put(msg)
 
         differ.set_test_option_on()
@@ -79,7 +79,3 @@ class TestNode(unittest.TestCase):
 
         time.sleep(5)
         assert differ.q_out.qsize() == 1
-
-
-if __name__ == "__main__":
-    unittest.main()
