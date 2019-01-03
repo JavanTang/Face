@@ -1,6 +1,7 @@
 import cv2
 import time
 import numpy as np
+from utils.image_base64 import image_to_base64
 
 from utils.image_base64 import image_to_base64
 

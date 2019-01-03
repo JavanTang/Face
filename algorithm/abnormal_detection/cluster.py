@@ -2,6 +2,7 @@ import cv2
 import time
 from numpy import *
 import numpy as np
+from utils.image_base64 import image_to_base64
 
 from utils.image_base64 import image_to_base64
 
@@ -222,4 +223,5 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
                     before_count += 1
             if before_count == len(before_last_time_cluster):
                 clusters_info.append(cluster)
+
         return clusters_info, flag, base64_data, image_id, cameraKey
