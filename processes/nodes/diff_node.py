@@ -31,5 +31,9 @@ class FrameDiffNode(BaseNode):
 
             image = msg_in.image
 
+            if self.q_out.qsize() > 4:
+                print("%s bottom queue size is greater than 4." % self.__class__.__name__)
+                continue
+
             if self.diff.compute_diff(image):
                 self.q_out.put(msg_in)
