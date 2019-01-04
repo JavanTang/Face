@@ -2,15 +2,7 @@
 @Author: TangZhiFeng
 @Data: 2019-01-04
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-04 13:53:18
-@Description: 
-'''
-
-'''
-@Author: TangZhiFeng
-@Data: 2019-01-04
-@LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-04 13:55:24
+@LastEditTime: 2019-01-04 14:06:31
 @Description: 实时识别——天台
 '''
 import os
