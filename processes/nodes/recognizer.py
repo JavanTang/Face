@@ -59,11 +59,13 @@ class BaseRecognizer(BaseNode):
 
             # TODO 这里运行时间长汇出错，这里判断一下
             try:
-                original_face_image, names, probabilities, boxes = engine.detect_recognize(
+                original_face_image, names, probabilities, boxes, points = engine.detect_recognize(
                     frame, p_threshold=self.threshold, min_size=self.minsize)
 
             except Exception:
                 print("Recogize error. Camera id: %s." % channel_id)
+                import traceback
+                traceback.print_exc()
                 continue
 
             for _, name, _ in zip(original_face_image, names, probabilities):

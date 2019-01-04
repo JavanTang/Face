@@ -75,9 +75,9 @@ class BaseEngine(object):
         # 如果传入的是图片路径，则从图片路径中加载图片
         if isinstance(img, str):
             img = cv2.imread(img)
-        scaled_images, boxes, flag = self.model.get_input(img)
+        scaled_images, boxes, points, flag = self.model.get_input(img)
 
-        return scaled_images, boxes, flag
+        return scaled_images, boxes, points, flag
 
     def recognize(self, scaled_images):
         """给定人脸图片集合，返回识别的姓名，概率和向量.
@@ -98,7 +98,7 @@ class BaseEngine(object):
             p_threshold (float): min probability for recognize.
             min_size (int): The detected face smaller than <min_size> will be filtered out.
         """
-        scaled_images, boxes, flag = self.get_detection(img)
+        scaled_images, boxes, points, flag = self.get_detection(img)
 
         # 什么都没检测到，返回空
         if not flag:
@@ -131,22 +131,23 @@ class BaseEngine(object):
 
         # probablities filter
         if p_threshold > -1:
-
+            probabilities = np.array(probabilities)
             p_filter = probabilities > p_threshold
             probabilities = probabilities[p_filter]
             boxes = boxes[p_filter]
+            points = np.concatenate([p for p, flag in zip(points, p_filter) if flag])
             names = [n for n, flag in zip(names, p_filter) if flag]
 
         for box in boxes:
             original_face_image.append(img[box[1]: box[3], box[0]: box[2]])
 
-        return original_face_image, names, probabilities, boxes
+        return original_face_image, names, probabilities, boxes, points
 
     def detect_recognize_stranger(self, img, p_threshold, p_threshold_stranger, min_size, batch_size=5, stranger_id='stranger'):
         """
         人脸识别+陌生人识别，必须指定阈值
         """
-        original_face_image, names, probabilities, boxes = self.detect_recognize(
+        original_face_image, names, probabilities, boxes, _ = self.detect_recognize(
             img, min_size=min_size, batch_size=batch_size)
 
         # filter out acquaintance
@@ -175,10 +176,13 @@ class BaseEngine(object):
 
         return original_face_image, acquaintance, stranger
 
-    def visualize(self, image, names, probabilities, boxes):
-        for name, p, box in zip(names, probabilities, boxes):
+    def visualize(self, image, names, probabilities, boxes, points):
+        for name, p, box, p in zip(names, probabilities, boxes, points):
             cv2.rectangle(image, (box[0], box[1]),
                           (box[2], box[3]), (255, 0, 0), 2)
+
+            for i in range(5):
+                cv2.circle(image, (p[i], p[i+5]), 5, (111, 111, 111))
 
             cv2.putText(image, '%s: %f' % (
                 name, p), (box[0], box[3]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)

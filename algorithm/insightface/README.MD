@@ -20,7 +20,7 @@ engine = CosineSimilarityEngine(gpu_id=0)
 engine.load_database('../database/origin', True)
 
 frame = cv2.imread('your_img.jpg')
-original_face_image, names, probabilities, boxes = engine.detect_recognize(frame, p_threshold=self.threshold, min_size=self.minsize)
+original_face_image, names, probabilities, boxes, points = engine.detect_recognize(frame, p_threshold=self.threshold, min_size=self.minsize)
 ```
 
 ##### CosineVoteEngine
@@ -34,7 +34,7 @@ engine = CosineSimilarityEngine(top=5, gpu_id=0)
 engine.load_database('../database/origin', True)
 
 frame = cv2.imread('your_img.jpg')
-original_face_image, names, probabilities, boxes = engine.detect_recognize(frame, p_threshold=self.threshold, min_size=self.minsize)
+original_face_image, names, probabilities, boxes, points = engine.detect_recognize(frame, p_threshold=self.threshold, min_size=self.minsize)
 ```
 
 ##### NearestNeighborsEngine (待完成)
@@ -44,5 +44,5 @@ original_face_image, names, probabilities, boxes = engine.detect_recognize(frame
 ##### 可视化识别结果
 将检测到的人脸和识别结果显示在图片上
 ```py
-processed_image = engine.visualize(self, image, names, probabilities, boxes)  # image是原始图片， names、probabilities、boxes 是detect_recognize返回的结果
+processed_image = engine.visualize(self, image, names, probabilities, boxes, points)  # image是原始图片， names、probabilities、boxes 是detect_recognize返回的结果
 ```
