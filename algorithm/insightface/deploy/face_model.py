@@ -89,7 +89,7 @@ class FaceModel:
         flag = True
         if ret is None:
             flag = False
-            return None, None, flag
+            return None, None, None, flag
         bbox, points = ret
         num_face = bbox.shape[0]
         aligned = np.zeros((num_face, 3, 112, 112))
@@ -100,7 +100,7 @@ class FaceModel:
                 face_img, bbox[i, 0:4], points[i, :].reshape((2, 5)).T, image_size='112,112')
             nimg = cv2.cvtColor(nimg, cv2.COLOR_BGR2RGB)
             aligned[i] = np.transpose(nimg, (2, 0, 1))
-        return aligned, bbox, flag
+        return aligned, bbox, points, flag
 
     def get_feature_tensor(self, aligned):
         data = mx.nd.array(aligned, ctx=self.ctx)

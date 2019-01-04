@@ -23,29 +23,29 @@ class TestInsightFace(unittest.TestCase):
         self.muti_face_database_path = os.path.join(
             source_path, "database/old")
 
-    @excution_time(100)
+    @excution_time(10)
     def test_cosine_engine(self):
 
         cos_engine = insightface.CosineSimilarityEngine(0)
         cos_engine.load_database(self.database_path)
 
-        for _ in range(100):
-            _, names, p, _, = cos_engine.detect_recognize(self.test_image)
+        for _ in range(10):
+            _, names, p, _, _ = cos_engine.detect_recognize(self.test_image)
             pass
 
-    @excution_time(100)
+    @excution_time(10)
     def test_nearest_neibor(self):
         nearest_engine = insightface.NearestNeighborsEngine(0)
         nearest_engine.load_database(self.database_path)
 
-        for _ in range(100):
-            _, names, p, _, = nearest_engine.detect_recognize(self.test_image)
+        for _ in range(10):
+            _, names, p, _, _ = nearest_engine.detect_recognize(self.test_image)
             pass
 
     def test_svm_engine(self):
         svm_engine = insightface.SVMClassificationEngine(0)
         svm_engine.load_database(self.muti_face_database_path)
 
-        for _ in range(100):
-            _, names, p, _, = nearest_engine.detect_recognize(self.test_image)
+        for _ in range(10):
+            _, names, p, _, _ = svm_engine.detect_recognize(self.test_image)
             pass
