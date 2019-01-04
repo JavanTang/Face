@@ -20,6 +20,8 @@ class TestInsightFace(unittest.TestCase):
         self.test_image = cv2.imread(os.path.join(
             source_path, 'database/cache/test_picture.png'))
         self.database_path = os.path.join(source_path, "database/origin")
+        self.muti_face_database_path = os.path.join(
+            source_path, "database/old")
 
     @excution_time(100)
     def test_cosine_engine(self):
@@ -35,6 +37,14 @@ class TestInsightFace(unittest.TestCase):
     def test_nearest_neibor(self):
         nearest_engine = insightface.NearestNeighborsEngine(0)
         nearest_engine.load_database(self.database_path)
+
+        for _ in range(100):
+            _, names, p, _, = nearest_engine.detect_recognize(self.test_image)
+            pass
+
+    def test_svm_engine(self):
+        svm_engine = insightface.SVMClassificationEngine(0)
+        svm_engine.load_database(self.muti_face_database_path)
 
         for _ in range(100):
             _, names, p, _, = nearest_engine.detect_recognize(self.test_image)
