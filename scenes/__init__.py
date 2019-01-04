@@ -3,7 +3,7 @@
 @Data: 2018-12-28
 @LastEditors: TangZhiFeng
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-02 10:26:34
+@LastEditTime: 2019-01-03 11:16:25
 '''
 import queue
 import os
@@ -11,11 +11,14 @@ import sys
 import random
 import _thread
 import threading
+
 current = os.path.dirname(__name__)
 project = os.path.dirname(current)
 
 sys.path.append(project)
+from utils.socket_client import Client
 
+client = Client('')
 
 class BaseEngineering(object):
     '''应用工程视频类算法基类
@@ -39,7 +42,8 @@ class BaseEngineering(object):
         self.algorithems = []
         self.real_time = real_time
 
-        self.lucky_number = random.uniform(9.9, 2)  # 用来判断是否需要丢失这个data，用在algorithms_distribution中判断build_data之后的数据是否符合要求。
+        # 用来判断是否需要丢失这个data，用在algorithms_distribution中判断build_data之后的数据是否符合要求。
+        self.lucky_number = random.uniform(9.9, 2)
 
     def generater(self, data):
         '''经过最后的节点产生的数据，返回数据
@@ -84,25 +88,23 @@ class BaseEngineering(object):
                 self.into_algorithems(i, data)
             else:
                 self.generater(data)
-    
+
     def run(self):
         '''开始运行，运行方式是监听每一个算法的返回，用线程的方式。
         '''
         print('listen starting...')
+
         def listen(index, algorithms_obj):
             while True:
                 # print(1)
                 # for i in range(1000000):
                 #     pass
                 data = algorithms_obj.get()
-                print(data)
                 self.algorithms_distribution(index+1, data)
         for i in range(len(self.algorithems)):
-            _thread.start_new_thread(listen, (i,self.algorithems[i],))
+            _thread.start_new_thread(listen, (i, self.algorithems[i],))
         while True:
             pass
-        
-            
 
     def add_algorithems(self, algorithms, processes=False):
         '''添加算法
@@ -114,3 +116,32 @@ class BaseEngineering(object):
             processes {bool} -- 是否使用进程的方式 (default: {False})
         '''
         self.algorithems.append(algorithms)
+
+
+class BaseScenesManage(threading.Thread):
+    '''每个场景的管理
+    '''
+
+    def init_node(self):
+        '''初始化node，需要调用init_node，所有的初始化都要赋值到self中去，这里初始化一定要添加两个值，
+        一个值为self.nodes，一个值为self.manage，前者是所有的节点，后者是管理的节点。
+
+        Raises:
+            NotImplementedError -- [description]
+        '''
+
+        raise NotImplementedError
+
+    def run(self):
+        assert len(self.nodes) != 0
+        assert not self.manage is None
+        for node in self.nodes:
+            self.manage.add_algorithems(node)
+            node.run()
+        self.manage.run()
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.nodes = []
+        self.manage = None
+        self.init_node()

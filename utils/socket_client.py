@@ -2,7 +2,7 @@
 @Author: TangZhiFeng
 @Data: 2018-12-28 15:50:58 
 @LastEditors: TangZhiFeng
-@LastEditTime: 2018-12-29 15:43:33
+@LastEditTime: 2019-01-03 15:11:16
 @Description: 向socket service端发送请求
 '''
 import websocket
@@ -72,7 +72,7 @@ class Client(object):
 
     def connect(self, host):
         '''连接摄像头操作
-        
+
         Arguments:
             host {str} -- Websocket服务地址
         '''
@@ -84,12 +84,15 @@ class Client(object):
                                              on_close=on_close)
             self.ws.on_open = on_open
             result = self.ws.run_forever()
-            print(result)
+            if result is True:
+                print('iother exception was raised during a loop')
+            else:
+                print('caught KeyboardInterrupt')
         thread.start_new_thread(run, ())
 
     def send(self, msg):
         '''向Websocket Service发送数据
-        
+
         Arguments:
             msg {str} -- 文本的内容，一般情况是json格式的数据
         '''
@@ -98,3 +101,6 @@ class Client(object):
 
     def close(self):
         self.ws.close()
+
+client = Client('ws://120.55.60.90:8503')
+
