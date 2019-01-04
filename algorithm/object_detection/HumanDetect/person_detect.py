@@ -63,9 +63,21 @@ class PersonDetect(object):
             # person_acreage = abs(one_point[0]-two_point[0]) * abs(one_point[1]-two_point[1])
             return img
         else:
-            pass
+            None
 
     def detect_person(self, frame, cameraKey):
+
+        """
+        人体检测
+        :param frame:  摄像头当前帧图片
+        :param cameraKey:  摄像头编号
+        :return: [
+                    flag:  判断是否检测到人体，flag为True表示检测到人体，flag为False表示未检测到人体
+                    orig_im:  摄像头当前帧图片
+                    image_id:  用时间戳生成的图片编号
+                    cameraKey:  摄像头编号
+                 ]
+        """
 
         flag = False
         image_id = ''
@@ -104,13 +116,17 @@ class PersonDetect(object):
             output[i, [1, 3]] = torch.clamp(output[i, [1, 3]], 0.0, im_dim[i, 0])
             output[i, [2, 4]] = torch.clamp(output[i, [2, 4]], 0.0, im_dim[i, 1])
 
-        person_matrix = [map(lambda x: self.write(x, orig_im, self.classes, self.colors), output)]
+        person_matrix = []
+        for i in range(output.shape[0]):
+            detect_result = self.write(output[i], orig_im, self.classes, self.colors)
+            if detect_result is not None:
+                person_matrix.append(self.write(output[i], orig_im, self.classes, self.colors))
 
         if len(person_matrix) > 0:
             flag = True
             image_id = str(int(time.time()))
 
-        return flag, person_matrix, image_id, cameraKey
+        return flag, orig_im, image_id, cameraKey
 
 
 if __name__ == '__main__':
