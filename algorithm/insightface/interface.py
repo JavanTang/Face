@@ -307,6 +307,11 @@ class SVMClassificationEngine(BaseEngine):
         self.pre_trained = pre_trained
         self.force_reload = force_reload
 
+        # Create it if directory are not exists.
+        if not os.path.isdir(os.path.dirname(pre_trained)):
+            os.mkdir(os.path.dirname(pre_trained))
+
+
     def load_database(self, *args, **kwargs):
         super(SVMClassificationEngine, self).load_database(*args, **kwargs)
         self.feature_matrix = sklearn.preprocessing.normalize(
