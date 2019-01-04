@@ -1,9 +1,10 @@
 import base64
 import traceback
-import BytesIO
+import io
 import numpy as np
 import os
 from .time_utils import genera_stamp
+import cv2
 
 current = os.path.dirname(__name__)
 project = os.path.dirname(current)
@@ -17,13 +18,11 @@ def array_to_file(array_data, names):
         array_data {array} -- 人脸的数组
         names {str} -- 人员的编号
     '''
-    path = [os.path.join(img_path, genera_stamp()) for i in names]
-    for index in len(array_data):
+    path = [os.path.join(img_path, genera_stamp())+'.jpg' for i in names]
+    for index in range(len(array_data)):
         img_array = array_data[index]
-        b64_code = array_to_base64(img_array)
-        image = base64_to_image(b64_code)
-        with open(path, 'wb+') as f:
-            f.write(image)
+        cv2.imwrite(path[index], img_array)
+    
     return path
 
 
@@ -34,7 +33,7 @@ def array_to_base64(array_data):
         array_data {numpy} -- 图片数组
     '''
     arr = np.arange(12).reshape(3, 4)
-    bytesio = BytesIO()
+    bytesio = io.BytesIO()
     np.savetxt(bytesio, arr)  # 只支持1维或者2维数组，numpy数组转化成字节流
     content = bytesio.getvalue()  # 获取string字符串表示
     b64_code = base64.b64encode(content)
@@ -47,11 +46,8 @@ def base64_to_image(base64_data):
     :return: image: 图片对象
     """
 
-    try:
-        image = base64.b64decode(base64_data)
-        return image
-    except:
-        traceback.print_exc()
+    image = base64.b64decode(base64_data)
+    return image
 
 
 def image_to_base64(image):
