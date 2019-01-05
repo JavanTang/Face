@@ -130,12 +130,13 @@ class BaseEngine(object):
             probabilities.extend(p)
 
         # probablities filter
+        probabilities = np.array(probabilities)
         if p_threshold > -1:
-            probabilities = np.array(probabilities)
             p_filter = probabilities > p_threshold
             probabilities = probabilities[p_filter]
             boxes = boxes[p_filter]
-            points = np.concatenate([p for p, flag in zip(points, p_filter) if flag])
+            points = np.concatenate(
+                [p for p, flag in zip(points, p_filter) if flag])
             names = [n for n, flag in zip(names, p_filter) if flag]
 
         for box in boxes:
@@ -150,31 +151,69 @@ class BaseEngine(object):
         original_face_image, names, probabilities, boxes, _ = self.detect_recognize(
             img, min_size=min_size, batch_size=batch_size)
 
+        if len(names) == 0:
+            acquaintance = {
+                'image_matrix': [],
+                'names': [],
+                'probabilities': [],
+                'boxes': []
+            }
+            stranger = {
+                'image_matrix': [],
+                'names': [],
+                'probabilities': [],
+                'boxes': []
+            }
+            return acquaintance, stranger
+
         # filter out acquaintance
         p_filter = probabilities > p_threshold
-        p_acquaintance = probabilities[p_filter]
-        b_acquaintance = boxes[p_filter]
         n_acquaintance = [n for n, flag in zip(names, p_filter) if flag]
+        if len(n_acquaintance) == 0:
+            acquaintance = {
+                'image_matrix': [],
+                'names': [],
+                'probabilities': [],
+                'boxes': []
+            }
+        else:
+            p_acquaintance = probabilities[p_filter]
+            b_acquaintance = boxes[p_filter]
+            image_acquaintance = [im for im, flag in zip(
+                original_face_image, p_filter) if flag]
 
-        acquaintance = {
-            'names': n_acquaintance,
-            'probabilities': p_acquaintance,
-            'boxes': b_acquaintance
-        }
+            acquaintance = {
+                'image_matrix': image_acquaintance,
+                'names': n_acquaintance,
+                'probabilities': p_acquaintance,
+                'boxes': b_acquaintance
+            }
 
         # filter out stranger
         p_filter = probabilities < p_threshold_stranger
-        p_stranger = probabilities[p_filter]
-        b_stranger = boxes[p_filter]
         n_stranger = [stranger_id for n, flag in zip(names, p_filter) if flag]
 
-        stranger = {
-            'names': n_stranger,
-            'probabilities': p_stranger,
-            'boxes': b_stranger
-        }
+        if len(n_stranger) == 0:
+            stranger = {
+                'image_matrix': [],
+                'names': [],
+                'probabilities': [],
+                'boxes': []
+            }
+        else:
+            p_stranger = probabilities[p_filter]
+            b_stranger = boxes[p_filter]
+            image_stranger = [im for im, flag in zip(
+                original_face_image, p_filter) if flag]
 
-        return original_face_image, acquaintance, stranger
+            stranger = {
+                'image_matrix': image_stranger,
+                'names': n_stranger,
+                'probabilities': p_stranger,
+                'boxes': b_stranger
+            }
+
+        return acquaintance, stranger
 
     def visualize(self, image, names, probabilities, boxes, points):
         for name, p, box, p in zip(names, probabilities, boxes, points):

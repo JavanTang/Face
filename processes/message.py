@@ -41,6 +41,20 @@ class RecognizerMessage(object):
         return "Face number: %s\nNames: %s\nRecord_time: %s\nChannel_id: %s. Tag: %s." % (len(self.image_matrix), self.names, self.record_time, self.chanel_id, self.tag)
 
 
+class StrangerMessage(RecognizerMessage):
+    """
+    相对于RecognizerMessage 增加了陌生人的字段
+    """
+
+    def __init__(self, stranger_matrix, stranger_labels, *args, **kwargs):
+        super(StrangerMessage, self).__init__(*args, **kwargs)
+        self.stranger_matrix = stranger_matrix
+        self.stranger_labels = stranger_labels
+
+    def __str__(self):
+        return "Stranger number: %s\n" % len(self.stranger_matrix) + super(StrangerMessage, self).__str__()
+
+
 class AbnormalDetectionMessage(object):
     """Wrap message transfer from abnormal recognizer to root management node
     """
