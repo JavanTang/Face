@@ -14,6 +14,7 @@ from processes.nodes import recorder
 from processes.nodes import recognizer
 from processes.nodes import diff_node
 from processes.nodes import smoke
+from processes.nodes import human
 
 
 class TestNode(unittest.TestCase):
@@ -111,3 +112,19 @@ class TestNode(unittest.TestCase):
         smoke_detector._run_sigle_process(0)
 
         print(smoke_detector.q_out.qsize())
+
+    def test_people_detection(self):
+        
+        print(123123)
+        people_detector = human.HumanDetection(1)
+        people_detector.init_node()
+        for i in range(5):
+            frame = cv2.imread(os.path.join(
+                here, '../database/cache/person.jpg'))
+            msg = people_detector.TOP(frame, '2', 'test')
+            people_detector.put(msg)
+
+        people_detector.set_test_option_on()
+        people_detector._run_sigle_process(0)
+
+        print(people_detector.q_out.qsize())
