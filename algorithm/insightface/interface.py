@@ -13,6 +13,7 @@ import scipy
 import sklearn
 
 from sklearn import svm
+from sklearn.model_selection import train_test_split
 from gluonnlp.embedding.evaluation import CosineSimilarity
 from sklearn.neighbors import NearestNeighbors
 
@@ -221,7 +222,7 @@ class BaseEngine(object):
 
             cv2.putText(image, '%s: %f' % (
                 name, p), (box[0], box[3]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-        
+
         if points is not None:
             for p in points:
                 for i in range(5):
@@ -360,14 +361,17 @@ class SVMClassificationEngine(BaseEngine):
         self.feature_matrix = sklearn.preprocessing.normalize(
             self.feature_matrix.asnumpy())
 
-        all_names = list(set(self.index2name))
-        self.name2label = {name: i for name, i in zip(
-            set(self.index2name), range(len(all_names)))}
-        self.label2name = {i: name for i, name in self.name2label.items()}
+        label2name = list()
+        for n in self.index2name:
+            if n not in label2name:
+                label2name.append(n)
+
+        self.label2name = label2name
+        self.name2label = {name: i for i, name in enumerate(label2name)}
 
         self.labels = np.array([self.name2label[n] for n in self.index2name])
 
-        if not os.path.exists(self.pre_trained) and not self.force_reload:
+        if not os.path.exists(self.pre_trained) or self.force_reload:
             self.clf = svm.SVC(
                 kernel='linear', probability=True, decision_function_shape="ovr")
             self.clf.fit(self.feature_matrix, self.labels)
@@ -378,6 +382,35 @@ class SVMClassificationEngine(BaseEngine):
             f = open(self.pre_trained, 'rb')
             self.clf = pickle.load(f)
             f.close()
+
+    def train_test(self, *args, **kwargs):
+        super(SVMClassificationEngine, self).load_database(*args, **kwargs)
+        self.feature_matrix = sklearn.preprocessing.normalize(
+            self.feature_matrix.asnumpy())
+
+        label2name = list()
+        for n in self.index2name:
+            if n not in label2name:
+                label2name.append(n)
+
+        self.label2name = label2name
+        self.name2label = {name: i for i, name in enumerate(label2name)}
+
+        self.labels = np.array([self.name2label[n] for n in self.index2name])
+
+        x_train, x_test, y_train, y_test = train_test_split(
+            self.feature_matrix, self.labels, random_state=25, train_size=0.8, test_size=0.2)
+
+        self.clf = svm.SVC(
+            kernel='linear', probability=True, decision_function_shape="ovr")
+        self.clf.fit(x_train, y_train)
+
+        f = open(self.pre_trained, 'wb')
+        pickle.dump(self.clf, f)
+        f.close()
+
+        score = self.clf.score(x_test, y_test)
+        return score
 
     def recognize(self, scaled_images):
         """Hook implementation of super class

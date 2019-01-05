@@ -31,7 +31,7 @@ class TestInsightFace(unittest.TestCase):
 
         for _ in range(10):
             _, names, p, _, _ = cos_engine.detect_recognize(self.test_image)
-            pass
+            print(names)
 
     @excution_time(10)
     def test_nearest_neibor(self):
@@ -39,13 +39,16 @@ class TestInsightFace(unittest.TestCase):
         nearest_engine.load_database(self.database_path)
 
         for _ in range(10):
-            _, names, p, _, _ = nearest_engine.detect_recognize(self.test_image)
+            _, names, p, _, _ = nearest_engine.detect_recognize(
+                self.test_image)
             pass
 
     def test_svm_engine(self):
         svm_engine = insightface.SVMClassificationEngine(0)
-        svm_engine.load_database(self.muti_face_database_path)
+        # svm_engine.load_database(self.muti_face_database_path)
+        score = svm_engine.train_test(self.muti_face_database_path)
+        print(score)
 
-        for _ in range(10):
-            _, names, p, _, _ = svm_engine.detect_recognize(self.test_image)
-            pass
+        # for _ in range(10):
+        #     _, names, p, _, _ = svm_engine.detect_recognize(self.test_image)
+        #     print(names)
