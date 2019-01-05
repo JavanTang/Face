@@ -1,9 +1,34 @@
 import cv2
+import os
 import time
 import tensorflow as tf
-from algorithm.fire_detection.smoke_detection_core.core_function import single_frame_detect
-from algorithm.fire_detection.train_and_detection.train_libs_auxiliary import get_model_and_hparams
+from .smoke_detection_core.core_function import single_frame_detect
+from .train_and_detection.train_libs_auxiliary import get_model_and_hparams
 
+here = os.path.abspath(os.path.dirname(__file__))
+
+def get_default_model(net_name="cnn3d", ckpt_dir='./summary/cnn3d_16'):
+    """ 获取默认的模型
+        net_name (str, optional):  要使用哪个网络,值为'cnn3d'或'cnn2d_lstm'
+    """
+
+    _, model = get_model_and_hparams(net_name)
+
+    cfg = tf.ConfigProto()
+    cfg.gpu_options.allow_growth = True
+    sess = tf.Session(config=cfg)
+    saver = tf.train.Saver(tf.global_variables())
+
+    # 模型加载改变当前路径
+    origin_path = os.path.abspath(os.curdir)
+    os.chdir(here)
+
+    ckpt = tf.train.get_checkpoint_state(ckpt_dir)
+    saver.restore(sess, ckpt.model_checkpoint_path)
+
+    os.chdir(origin_path)
+
+    return sess, model
 
 def detect(sess, model, frame, frame_height, frame_width, block_threshold, cameraKey):
 
@@ -25,7 +50,7 @@ def detect(sess, model, frame, frame_height, frame_width, block_threshold, camer
 
     flag = False
     image_id = ''
-
+    
     smoke_blocks = single_frame_detect(sess, model, frame, frame_height, frame_width)
     print(len(smoke_blocks))
 
@@ -41,36 +66,3 @@ def detect(sess, model, frame, frame_height, frame_width, block_threshold, camer
     else:
         return flag, frame, cameraKey, image_id
 
-
-if __name__ == '__main__':
-
-    netName = 'cnn3d'
-    ckpt_dir = './summary/cnn3d_17'
-    block_threshold = 10
-
-    hparams, model = get_model_and_hparams(netName)
-
-    cfg = tf.ConfigProto()
-    cfg.gpu_options.allow_growth = True
-    sess = tf.InteractiveSession(config=cfg)
-    saver = tf.train.Saver(tf.global_variables())
-    ckpt = tf.train.get_checkpoint_state(ckpt_dir)
-    saver.restore(sess, ckpt.model_checkpoint_path)
-
-    cap = cv2.VideoCapture('./fire.mp4')
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-
-    while True:
-        frames = []
-        res, frame = cap.read()
-        if not res:
-            break
-        else:
-            flag, frame, cameraKey, image_id = detect(sess=sess,
-                                                      model=model,
-                                                      frame=frame,
-                                                      frame_height=height,
-                                                      frame_width=width,
-                                                      block_threshold=block_threshold,
-                                                      cameraKey='1')

@@ -1,2 +1,2 @@
-model_checkpoint_path: "/media/liuyukai/Technical work/Video_Smoke_Detection-master/summary/cnn3d_16/model.ckpt-4406"
-all_model_checkpoint_paths: "/media/liuyukai/Technical work/Video_Smoke_Detection-master/summary/cnn3d_16/model.ckpt-9297"
+model_checkpoint_path: "summary/cnn3d_16/model.ckpt-4406"
+all_model_checkpoint_paths: "summary/cnn3d_16/model.ckpt-9297"

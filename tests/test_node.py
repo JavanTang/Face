@@ -13,6 +13,7 @@ sys.path.append(source_path)
 from processes.nodes import recorder
 from processes.nodes import recognizer
 from processes.nodes import diff_node
+from processes.nodes import smoke
 
 
 class TestNode(unittest.TestCase):
@@ -95,3 +96,17 @@ class TestNode(unittest.TestCase):
 
         time.sleep(5)
         assert differ.q_out.qsize() == 1
+
+    def test_smoke(self):
+        smoke_detector = smoke.SmokeDetection(1)
+        smoke_detector.init_node(10)
+        for i in range(5):
+            frame = cv2.imread(os.path.join(
+                here, '../database/cache/smoke.png'))
+            msg = smoke_detector.TOP(frame, '2', 'test')
+            smoke_detector.put(msg)
+
+        smoke_detector.set_test_option_on()
+        smoke_detector._run_sigle_process(0)
+
+        print(smoke_detector.q_out.qsize())
