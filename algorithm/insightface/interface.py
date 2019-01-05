@@ -102,7 +102,7 @@ class BaseEngine(object):
 
         # 什么都没检测到，返回空
         if not flag:
-            return [], [], [], []
+            return [], [], [], [], []
 
         original_face_image = list()
         boxes = boxes.astype(np.int32)
@@ -135,8 +135,7 @@ class BaseEngine(object):
             p_filter = probabilities > p_threshold
             probabilities = probabilities[p_filter]
             boxes = boxes[p_filter]
-            points = np.concatenate(
-                [p for p, flag in zip(points, p_filter) if flag])
+            points = [p for p, flag in zip(points, p_filter) if flag]
             names = [n for n, flag in zip(names, p_filter) if flag]
 
         for box in boxes:
