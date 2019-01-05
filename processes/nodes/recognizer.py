@@ -86,7 +86,7 @@ class BaseRecognizer(BaseNode):
                     original_face_image, names, img_time, channel_id, tag)
                 self.q_out.put(msg)
 
-            if self.stranger_threshold is not None and (len(names) > 0 or len(stranger_names > 0)):
+            if self.stranger_threshold is not None and (len(names) > 0 or len(stranger_names) > 0):
                 msg = StrangerMessage(stranger_face_image, stranger_names,
                                       original_face_image, names, img_time, channel_id, tag)
                 self.q_out.put(msg)
