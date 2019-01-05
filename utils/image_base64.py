@@ -7,7 +7,7 @@ import os
 from .time_utils import genera_stamp
 import cv2
 
-current = os.path.dirname(__name__)
+current = os.path.dirname(__file__)
 project = os.path.dirname(current)
 img_path = os.path.join(project, 'database/detect_image') # 图片需要存放的位置
 
@@ -23,7 +23,6 @@ def array_to_file(array_data, names):
     for index in range(len(array_data)):
         img_array = array_data[index]
         cv2.imwrite(path[index], img_array)
-    
     return path
 
 

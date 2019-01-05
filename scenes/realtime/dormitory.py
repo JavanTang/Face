@@ -2,7 +2,7 @@
 @Author: TangZhiFeng
 @Data: 2019-01-04
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-04 13:56:20
+@LastEditTime: 2019-01-05 15:11:17
 @Description: 实时识别——宿舍楼
 '''
 import os
@@ -50,32 +50,36 @@ class RealTimeDormitoryEngineering(BaseEngineering):
         Arguments:
             data {[obj]} -- 对象中含有我需要的数据
         '''
-        result = {
+        result = {'data': {
             'type': 1,
             'data': {},
             'stamp': genera_stamp(),
             'scene': 102
-        }
-        result['data']['camera_id'] = data.chanel_id
-        result['data']['scenario_id'] = data.chanel_id
-        result['data']['recognition'] = data.names
-        result['data']['stranger'] = []
+        }}
+        result['data']['data']['camera_id'] = data.chanel_id
+        result['data']['data']['scenario_id'] = data.chanel_id
+        result['data']['data']['recognition'] = data.names
+        result['data']['data']['stranger'] = []
         path = array_to_file(data.image_matrix, data.names)
-        batch_people_upload(path,data.chanel_id,data.names,result['stamp'])
+        batch_people_upload(path, data.chanel_id,
+                            data.names, result['data']['stamp'])
         client.send(json.dumps(result, ensure_ascii=False))
 
 
 class RealTimeDormitoryScene(BaseScenesManage):
-    '''实时校门检测
+    '''实时宿舍检测
     '''
 
     def init_node(self):
+        '''[summary]
+        '''
+
         camera = CameraReader()
         real_time_rec = RealTimeRecognizer(2)
         diff = FrameDiffNode(1)
         diff.init_node()
         camera.init_node(
-            ['rtsp://admin:admin12345@192.168.0.52:554/Streaming/Channels/101'], [1], 10, "123")
+            ['rtsp://admin:admin12345@192.168.0.52:554/Streaming/Channels/101'], ["1"], 10, "123")
         real_time_rec.init_node()
         self.nodes.append(diff)
         self.nodes.append(camera)

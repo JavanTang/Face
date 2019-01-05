@@ -106,10 +106,3 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
             all_people_info.append(people_info)
 
         return all_people_info, flag, cameraImg, image_id, cameraKey
-
-
-
-
-
-
-
