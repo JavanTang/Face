@@ -9,7 +9,6 @@ class FrameDiff:
         self.pixel_threshold = pixel_threshold
 
     def compute_diff(self, cur_frame):
-
         flag = False
 
         if self.next_frame is None:

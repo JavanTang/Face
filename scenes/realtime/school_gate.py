@@ -1,8 +1,9 @@
+
 '''
 @Author: TangZhiFeng
 @Data: 2019-01-04
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-04 13:51:33
+@LastEditTime: 2019-01-04 15:56:12
 @Description: 实时识别场景,出入校
 '''
 
@@ -13,15 +14,15 @@ import json
 current = os.path.dirname(__name__)
 project = os.path.dirname(os.path.dirname(current))
 sys.path.append(project)
-from utils.image_base64 import array_to_file
-from processes.nodes.diff_node import FrameDiffNode
-from processes.nodes.recorder import CameraReader
-from scenes import BaseEngineering, BaseScenesManage
-from processes.nodes.recognizer import RealTimeRecognizer
-from utils.time_utils import genera_stamp
-from utils.socket_client import client
-from utils.upload_image import batch_people_upload
 
+from utils.upload_image import batch_people_upload
+from utils.socket_client import client
+from utils.time_utils import genera_stamp
+from processes.nodes.recognizer import RealTimeRecognizer
+from scenes import BaseEngineering, BaseScenesManage
+from processes.nodes.recorder import CameraReader
+from processes.nodes.diff_node import FrameDiffNode
+from utils.image_base64 import array_to_file
 class RealTimeSchoolGateEngineering(BaseEngineering):
     '''实时检测学校出入大门
     '''
@@ -35,34 +36,37 @@ class RealTimeSchoolGateEngineering(BaseEngineering):
 
     def generater(self, data):
         '''返回示例{
-                type:1//识别数据类型,1 为人员检测结果,非 1 为场景异常结果
                 data:{
-                    camera_id:xxxx,//识别摄像头 id
-                    scenario_id:xxx,//场所 id
-                    recognition:[xxxxx,xxxxx,xxxxx],//图片识别时间戳
-                    stranger:[xxxxx,xxxxx,xxxxx] //陌生人
-                },
-                stamp:xxxxx,
-                //识别结果时间戳
-                scene:xxxx
-                //识别场景类型,不同场景类型对应不同异常规则,scene>=100
+                    type:1//识别数据类型,1 为人员检测结果,非 1 为场景异常结果
+                    data:{
+                        camera_id:xxxx,//识别摄像头 id
+                        scenario_id:xxx,//场所 id
+                        recognition:[xxxxx,xxxxx,xxxxx],//图片识别时间戳
+                        stranger:[xxxxx,xxxxx,xxxxx] //陌生人
+                    },
+                    stamp:xxxxx,
+                    //识别结果时间戳
+                    scene:xxxx
+                    //识别场景类型,不同场景类型对应不同异常规则,scene>=100
+                }
             }
 
         Arguments:
             data {[obj]} -- 对象中含有我需要的数据
         '''
-        result = {
+        result = {'data': {
             'type': 1,
             'data': {},
             'stamp': genera_stamp(),
-            'scene': 103  
-        }
-        result['data']['camera_id'] = data.chanel_id
-        result['data']['scenario_id'] = data.chanel_id
-        result['data']['recognition'] = data.names
-        result['data']['stranger'] = []
+            'scene': 103
+        }}
+        result['data']['data']['camera_id'] = data.chanel_id
+        result['data']['data']['scenario_id'] = data.chanel_id
+        result['data']['data']['recognition'] = data.names
+        result['data']['data']['stranger'] = []
         path = array_to_file(data.image_matrix, data.names)
-        batch_people_upload(path,data.chanel_id,data.names,result['stamp'])
+        batch_people_upload(path, data.chanel_id,
+                            data.names, result['data']['stamp'])
         client.send(json.dumps(result, ensure_ascii=False))
 
 
@@ -78,12 +82,11 @@ class RealTimeSchoolGateScene(BaseScenesManage):
         camera.init_node(
             ['rtsp://admin:admin12345@192.168.0.52:554/Streaming/Channels/101'], [1], 10, "123")
         real_time_rec.init_node()
-        self.nodes.append(diff)
         self.nodes.append(camera)
+        self.nodes.append(diff)
+
         self.nodes.append(real_time_rec)
         self.manage = RealTimeSchoolGateEngineering()
-
-
 
 
 if __name__ == "__main__":

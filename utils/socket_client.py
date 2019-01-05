@@ -2,7 +2,7 @@
 @Author: TangZhiFeng
 @Data: 2018-12-28 15:50:58 
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-03 15:11:16
+@LastEditTime: 2019-01-04 15:59:16
 @Description: 向socket service端发送请求
 '''
 import websocket
@@ -102,5 +102,5 @@ class Client(object):
     def close(self):
         self.ws.close()
 
-client = Client('ws://120.55.60.90:8503')
+client = Client('ws://192.168.0.140:9501')
 
