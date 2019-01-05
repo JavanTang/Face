@@ -3,7 +3,7 @@
 @Data: 2018-12-28
 @LastEditors: TangZhiFeng
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-03 11:16:25
+@LastEditTime: 2019-01-05 16:10:52
 '''
 import queue
 import os
@@ -69,7 +69,13 @@ class BaseEngineering(object):
             i {[type]} -- [description]
             data {[type]} -- [description]
         '''
-        self.algorithems[i].put(data)   # 通用方式 TODO 都把put变成data
+        # 当self.algorithems[i]为list的时候，就代表需要并行运行，所谓的并行运行的本质就是
+        # 将数据喂给这一层每一个算法模块。
+        if isinstance(self.algorithems[i],list):
+            for child_algorithem in self.algorithems[i]:
+                child_algorithem.put(data)
+        else:
+            self.algorithems[i].put(data)   # 通用方式 TODO 都把put变成data
 
     def algorithms_distribution(self, i,  data):
         '''算法行走流程
@@ -96,9 +102,6 @@ class BaseEngineering(object):
 
         def listen(index, algorithms_obj):
             while True:
-                # print(1)
-                # for i in range(1000000):
-                #     pass
                 data = algorithms_obj.get()
                 self.algorithms_distribution(index+1, data)
         for i in range(len(self.algorithems)):
@@ -110,7 +113,9 @@ class BaseEngineering(object):
         '''添加算法
 
         Arguments:
-            algorithms {func} -- 执行算法的函数
+            algorithms {func or list} -- 执行算法的函数或者是一个list，func代表是串行运行，
+            list代表是并行运行的算法（例如在大门口的场景，需要查看聚集、逗留、消防、持械等等，这些
+            的层级都是一样的）
 
         Keyword Arguments:
             processes {bool} -- 是否使用进程的方式 (default: {False})
