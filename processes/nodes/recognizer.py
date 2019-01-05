@@ -210,7 +210,7 @@ class AbnormalDetectionRecognizer(BaseNode):
             msg = self.q_in.get()
             frame, channel_id, _ = msg.image, msg.channel_id, msg.record_time
             try:
-                scaled_images, boxes, flag = engine.model.get_input(frame)
+                scaled_images, boxes, _,flag = engine.model.get_input(frame)
                 if not flag:
                     continue
                 mx_image_tensor = engine.model.get_feature_tensor(

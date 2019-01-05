@@ -1,6 +1,6 @@
 import logging
-from NN_model.cnn3d import Cnn3d, Cnn3d_conf
-from NN_model.cnn2d_lstm import Cnn2d_lstm, Cnn2d_lstm_conf
+from algorithm.fire_detection.NN_model.cnn3d import Cnn3d, Cnn3d_conf
+from algorithm.fire_detection.NN_model.cnn2d_lstm import Cnn2d_lstm, Cnn2d_lstm_conf
 
 class model_factory(object):
     models = {}

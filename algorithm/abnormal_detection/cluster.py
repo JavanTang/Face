@@ -1,4 +1,3 @@
-import cv2
 import time
 from numpy import *
 import numpy as np
