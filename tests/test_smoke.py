@@ -1,25 +1,34 @@
-import sys
-import os
-import unittest
-import time
 import cv2
 
-here = os.path.abspath(os.path.dirname(__file__))
-
-# 将所要测试的源码路径放入path下面
-source_path = os.path.join(here, '../')
-sys.path.append(source_path)
-
-from algorithm import fire_detection
+from algorithm.fire_detection.smoke_detect import detect, get_default_model
 
 
-class TestFireDetection(unittest.TestCase):
+class TestFireDetection(object):
 
-    def test_smoke_detection(self):
-        sess, model = fire_detection.get_default_model()
-        frame = os.path.join(here, '../database/cache/smoke.png')
-        frame = cv2.imread(frame)
-        flag, frame, cameraKey, image_id = fire_detection.detect(
-            sess, model, frame, frame.shape[0], frame.shape[1], 10, '1')
+    @staticmethod
+    def test_smoke_detection():
 
-        print(flag)
+        print('9999')
+
+        sess, model = get_default_model()
+
+        print('3333')
+        cap = cv2.VideoCapture('../algorithm/fire_detection/fire.mp4')
+
+        while True:
+            res, frame = cap.read()
+
+            if not res:
+                break
+            print(res)
+            # frame = os.path.join(here, '../database/cache/smoke.png')
+            # frame = cv2.imread(frame)
+
+            flag, frame, cameraKey, image_id = detect(
+                sess, model, frame, frame.shape[0], frame.shape[1], 10, '1')
+
+            print(flag)
+
+
+if __name__ == '__main__':
+    TestFireDetection.test_smoke_detection()

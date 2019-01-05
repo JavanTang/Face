@@ -6,8 +6,21 @@ import pickle as pkl
 from algorithm.object_detection.util import *
 from algorithm.object_detection.darknet import Darknet
 from algorithm.object_detection.preprocess import letterbox_image
-from algorithm.object_detection.configs import confidence, nms_thresh, cfg, weights, reso
+from algorithm.object_detection.configs import confidence, nms_thresh, cfg, weights, reso, classes_model, pallete_model
 
+
+def load_model():
+
+    # 加载参数和模型
+    print("Loading network.....")
+    model = Darknet(cfg)
+    model.load_weights(weights)
+    print("Network successfully loaded")
+
+    classes = load_classes(classes_model)
+    colors = pkl.load(open(pallete_model, "rb"))
+
+    return model, classes, colors
 
 def get_test_input(frame, input_dim, CUDA):
 
