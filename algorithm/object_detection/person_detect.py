@@ -1,4 +1,5 @@
 from __future__ import division
+import os
 import cv2
 import time
 import random
@@ -8,8 +9,13 @@ from algorithm.object_detection.darknet import Darknet
 from algorithm.object_detection.preprocess import letterbox_image
 from algorithm.object_detection.configs import confidence, nms_thresh, cfg, weights, reso, classes_model, pallete_model
 
+here = os.path.abspath(os.path.dirname(__file__))
 
 def load_model():
+
+    # 模型加载改变当前路径
+    origin_path = os.path.abspath(os.curdir)
+    os.chdir(here)
 
     # 加载参数和模型
     print("Loading network.....")
@@ -19,6 +25,8 @@ def load_model():
 
     classes = load_classes(classes_model)
     colors = pkl.load(open(pallete_model, "rb"))
+
+    os.chdir(origin_path)
 
     return model, classes, colors
 
