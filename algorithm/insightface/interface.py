@@ -220,7 +220,7 @@ class BaseEngine(object):
                           (box[2], box[3]), (255, 0, 0), 2)
 
             for i in range(5):
-                cv2.circle(image, (p[i], p[i+5]), 5, (111, 111, 111))
+                cv2.circle(image, (p[i], p[i+5]), 1, (0, 255, 0), -1)
 
             cv2.putText(image, '%s: %f' % (
                 name, p), (box[0], box[3]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
@@ -352,7 +352,6 @@ class SVMClassificationEngine(BaseEngine):
         # Create it if directory are not exists.
         if not os.path.isdir(os.path.dirname(pre_trained)):
             os.mkdir(os.path.dirname(pre_trained))
-
 
     def load_database(self, *args, **kwargs):
         super(SVMClassificationEngine, self).load_database(*args, **kwargs)
