@@ -7,7 +7,7 @@ from .train_and_detection.train_libs_auxiliary import get_model_and_hparams
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-def get_default_model(net_name="cnn3d", ckpt_dir='../algorithm/fire_detection/summary/cnn3d_16'):
+def get_default_model(net_name="cnn3d", ckpt_dir='./summary/cnn3d_16'):
     """ 获取默认的模型
         net_name (str, optional):  要使用哪个网络,值为'cnn3d'或'cnn2d_lstm'
     """
