@@ -74,3 +74,21 @@ class AbnormalDetectionMessage(object):
 
     def __str__(self):
         return "Camera Key: %s detect %s situation. flag: %s." % (self.camera_key, self.abnormal_type, self.flag)
+
+class HumanDetectionMessage(object):
+    """Wrap message transfer from human detection to root management node
+    """
+
+    def __init__(self,
+                 flag,
+                 image_matrix,
+                 image_id,
+                 camera_key
+                 ):
+        self.flag = flag
+        self.image_matrix = image_matrix
+        self.image_id = image_id
+        self.camera_key = camera_key
+
+    def __str__(self):
+        return "Camera Key: %s detect human. flag: %s." % (self.camera_key, self.flag)
