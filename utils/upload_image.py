@@ -9,7 +9,7 @@ transport = paramiko.Transport((ip, port))
 transport.connect(username=username, password=password)
 # TODO 这里没有close
 
-def upload_image_to_remote(ip, port, username, password, local_image_path, remote_save_path):
+def upload_image_to_remote(local_image_path, remote_save_path):
 
     '''
     从算法节点把识别到的人脸图片上传到web节点
@@ -26,10 +26,30 @@ def upload_image_to_remote(ip, port, username, password, local_image_path, remot
 
 
 def batch_people_upload(paths,camera_id,ids,stamp):
-    # remote_save_path = '/raid/home/wangning/1.png'
-    remote_save_path = '/docker_data/nginx/web/file/school_storge/man'
-    local_path = '/home/tangzhifeng/projects/RealTimeFace/database/old/1701203/1.jpg'
-    for index in range(len(ids)):
-        remote_path = os.path.join(remote_save_path, ids[index], str(camera_id), stamp+'.jpg')
-        upload_image_to_remote(ip,port,username,password,paths[index],remote_save_path)
+        '''批量上传type为1的情况
+        
+        Arguments:
+                paths {list} -- 本地照片的路径
+                camera_id {str} -- 摄像头编号
+                ids {str} -- 摄像头的编号
+                stamp {str} -- 时间戳
+        '''
 
+        # remote_save_path = '/raid/home/wangning/1.png'
+        remote_save_path = '/docker_data/nginx/web/file/school_storge/man'
+        for index in range(len(ids)):
+                remote_path = os.path.join(remote_save_path, ids[index], str(camera_id), stamp+'.jpg')
+                upload_image_to_remote(paths[index],remote_save_path)
+
+
+def batch_type2_upload(path,camera_id,stamp):
+        '''批量上传type为2的情况，远程存储路径：/excep_scene/设备编号/时间戳.jpg
+        
+        Arguments:
+                path {list} -- 本地存储的照片
+                camera_id {str} -- 摄像头编号
+                stamp {str} -- 时间戳
+        '''
+        remote_save_path = '/docker_data/nginx/web/file/school_storge/excep_scene'
+        remote_save_path = os.path.join(remote_save_path, str(camera_id), stamp + '.jpg')
+        upload_image_to_remote(path,remote_save_path)
