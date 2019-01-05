@@ -3,6 +3,7 @@
 """
 
 import os
+import pickle
 import glob
 import numpy as np
 import cv2
@@ -11,6 +12,7 @@ import sys
 import scipy
 import sklearn
 
+from sklearn import svm
 from gluonnlp.embedding.evaluation import CosineSimilarity
 from sklearn.neighbors import NearestNeighbors
 
@@ -73,9 +75,9 @@ class BaseEngine(object):
         # 如果传入的是图片路径，则从图片路径中加载图片
         if isinstance(img, str):
             img = cv2.imread(img)
-        scaled_images, boxes, flag = self.model.get_input(img)
+        scaled_images, boxes, points, flag = self.model.get_input(img)
 
-        return scaled_images, boxes, flag
+        return scaled_images, boxes, points, flag
 
     def recognize(self, scaled_images):
         """给定人脸图片集合，返回识别的姓名，概率和向量.
@@ -96,7 +98,7 @@ class BaseEngine(object):
             p_threshold (float): min probability for recognize.
             min_size (int): The detected face smaller than <min_size> will be filtered out.
         """
-        scaled_images, boxes, flag = self.get_detection(img)
+        scaled_images, boxes, points, flag = self.get_detection(img)
 
         # 什么都没检测到，返回空
         if not flag:
@@ -128,21 +130,59 @@ class BaseEngine(object):
             probabilities.extend(p)
 
         # probablities filter
-        probabilities = np.array(probabilities)
-        p_filter = probabilities > p_threshold
-        probabilities = probabilities[p_filter]
-        boxes = boxes[p_filter]
-        names = [n for n, flag in zip(names, p_filter) if flag]
+        if p_threshold > -1:
+            probabilities = np.array(probabilities)
+            p_filter = probabilities > p_threshold
+            probabilities = probabilities[p_filter]
+            boxes = boxes[p_filter]
+            points = np.concatenate([p for p, flag in zip(points, p_filter) if flag])
+            names = [n for n, flag in zip(names, p_filter) if flag]
 
         for box in boxes:
             original_face_image.append(img[box[1]: box[3], box[0]: box[2]])
 
-        return original_face_image, names, probabilities, boxes
+        return original_face_image, names, probabilities, boxes, points
 
-    def visualize(self, image, names, probabilities, boxes):
-        for name, p, box in zip(names, probabilities, boxes):
+    def detect_recognize_stranger(self, img, p_threshold, p_threshold_stranger, min_size, batch_size=5, stranger_id='stranger'):
+        """
+        人脸识别+陌生人识别，必须指定阈值
+        """
+        original_face_image, names, probabilities, boxes, _ = self.detect_recognize(
+            img, min_size=min_size, batch_size=batch_size)
+
+        # filter out acquaintance
+        p_filter = probabilities > p_threshold
+        p_acquaintance = probabilities[p_filter]
+        b_acquaintance = boxes[p_filter]
+        n_acquaintance = [n for n, flag in zip(names, p_filter) if flag]
+
+        acquaintance = {
+            'names': n_acquaintance,
+            'probabilities': p_acquaintance,
+            'boxes': b_acquaintance
+        }
+
+        # filter out stranger
+        p_filter = probabilities < p_threshold_stranger
+        p_stranger = probabilities[p_filter]
+        b_stranger = boxes[p_filter]
+        n_stranger = [stranger_id for n, flag in zip(names, p_filter) if flag]
+
+        stranger = {
+            'names': n_stranger,
+            'probabilities': p_stranger,
+            'boxes': b_stranger
+        }
+
+        return original_face_image, acquaintance, stranger
+
+    def visualize(self, image, names, probabilities, boxes, points):
+        for name, p, box, p in zip(names, probabilities, boxes, points):
             cv2.rectangle(image, (box[0], box[1]),
                           (box[2], box[3]), (255, 0, 0), 2)
+
+            for i in range(5):
+                cv2.circle(image, (p[i], p[i+5]), 5, (111, 111, 111))
 
             cv2.putText(image, '%s: %f' % (
                 name, p), (box[0], box[3]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
@@ -180,7 +220,7 @@ class CosineSimilarityEngine(BaseEngine):
             0, a.shape[0]).reshape(-1, b.shape[-1])
         batch_similarities = self.cos_op(
             a_, b_).reshape(a.shape[0], b.shape[0])
-        best_similarities = batch_similarities.max(1).asnumpy().tolist()
+        best_similarities = batch_similarities.max(1).asnumpy()
         best_index = batch_similarities.argmax(1).asnumpy().astype(np.int32)
         names = [self.index2name[i] for i in best_index]
 
@@ -234,6 +274,7 @@ class CosineVoteEngine(BaseEngine):
             sorted_name = sorted(tmp.items(), key=lambda x: x[1], reverse=True)
             names.append(sorted_name[0][0])
             probabilities.append(sorted_name[0][1])
+        probabilities = np.array(probabilities)
 
         return names, probabilities
 
@@ -265,6 +306,16 @@ class SVMClassificationEngine(BaseEngine):
     """使用sklean里面SVM分类器来计算与库中最相似的人脸
     """
 
+    def __init__(self, gpu_id=0, pre_trained=os.path.join(here, 'pre_trained/svm_cls/model.pkl'), force_reload=False):
+        super(SVMClassificationEngine, self).__init__(gpu_id=gpu_id)
+        self.pre_trained = pre_trained
+        self.force_reload = force_reload
+
+        # Create it if directory are not exists.
+        if not os.path.isdir(os.path.dirname(pre_trained)):
+            os.mkdir(os.path.dirname(pre_trained))
+
+
     def load_database(self, *args, **kwargs):
         super(SVMClassificationEngine, self).load_database(*args, **kwargs)
         self.feature_matrix = sklearn.preprocessing.normalize(
@@ -275,15 +326,29 @@ class SVMClassificationEngine(BaseEngine):
             set(self.index2name), range(len(all_names)))}
         self.label2name = {i: name for i, name in self.name2label.items()}
 
-        self.lables = np.array([self.name2label[n] for n in self.index2name])
+        self.labels = np.array([self.name2label[n] for n in self.index2name])
+
+        if not os.path.exists(self.pre_trained) and not self.force_reload:
+            self.clf = svm.SVC(
+                kernel='linear', probability=True, decision_function_shape="ovr")
+            self.clf.fit(self.feature_matrix, self.labels)
+            f = open(self.pre_trained, 'wb')
+            pickle.dump(self.clf, f)
+            f.close()
+        else:
+            f = open(self.pre_trained, 'rb')
+            self.clf = pickle.load(f)
+            f.close()
 
     def recognize(self, scaled_images):
         """Hook implementation of super class
         """
         image_tensor = self.model.get_feature(scaled_images)
-        dist, indices = self.nbrs.kneighbors(image_tensor)
-        indices = np.squeeze(indices)
-        dist = np.squeeze(dist)
+        predictions = self.clf.predict_proba(image_tensor)
 
-        names = [self.index2name[i] for i in indices]
-        return names, dist
+        best_class_indices = np.argmax(predictions, axis=1)
+        best_class_probabilities = predictions[np.arange(
+            len(best_class_indices)), best_class_indices]
+
+        names = [self.label2name[i] for i in best_class_indices]
+        return names, best_class_probabilities

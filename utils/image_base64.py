@@ -1,5 +1,6 @@
 import base64
 import traceback
+import time
 import io
 import numpy as np
 import os
@@ -63,3 +64,12 @@ def image_to_base64(image):
             return base64_data
     except:
         traceback.print_exc()
+
+
+def get_time_base64():
+    """将当前时间戳转化为base64编码。
+    """
+    cur_time = time.time()
+    encodestr = base64.b64encode(str(cur_time).encode('utf-8'))
+
+    return encodestr
