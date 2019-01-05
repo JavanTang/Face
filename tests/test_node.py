@@ -98,6 +98,7 @@ class TestNode(unittest.TestCase):
         assert differ.q_out.qsize() == 1
 
     def test_smoke(self):
+        # TODO test fail.
         smoke_detector = smoke.SmokeDetection(1)
         smoke_detector.init_node(10)
         for i in range(5):
