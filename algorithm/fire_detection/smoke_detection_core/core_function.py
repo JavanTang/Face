@@ -1,9 +1,7 @@
 from __future__ import print_function
-import cv2
 import numpy as np
-import tensorflow as tf
-from smoke_detection_core.motion_detection import img_to_block
-from train_and_detection.train_libs_auxiliary import get_model_and_hparams
+from algorithm.fire_detection.smoke_detection_core.motion_detection import img_to_block
+
 
 def smoke_classification(sess, model, frames_array, motion_blocks):
     # Use model to classify smoke.

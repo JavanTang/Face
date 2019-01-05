@@ -1,7 +1,6 @@
 import cv2
 import time
 import numpy as np
-from utils.image_base64 import image_to_base64
 
 from utils.image_base64 import image_to_base64
 
@@ -33,7 +32,7 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
     :returns [
               all_people_info：当前帧人脸信息更新起止时间后的信息
               flag：是否报警的标志位，False代表未报警，True代表报警
-              base64_data：异常图片的base64编码，如果报警（flag为True）, 将参数cameraImg转成base64格式的编码返回，否则为''
+              cameraImg：摄像头读取的当前帧的图片
               image_id：图片编号，如果报警（flag为True）, 生成以时间戳编码的图片编号, 否则为0
               cameraKey：摄像头编号
             ]
@@ -41,7 +40,6 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
 
     flag = False
     image_id = 0
-    base64_data = ''
 
     if before_last_time == []:
         return all_people, False, None, None, None
@@ -85,9 +83,6 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
                     # 报警，标志位变True
                     flag = True
 
-                    # 图片转base64
-                    base64_data = image_to_base64('cluster_image.jpg')
-
                     # image_id: 时间戳到秒
                     image_id = str(int(time.time()))
 
@@ -110,4 +105,11 @@ def stay_detect(cameraImg, before_last_time, all_people, cameraKey):
 
             all_people_info.append(people_info)
 
-        return all_people_info, flag, base64_data, image_id, cameraKey
+        return all_people_info, flag, cameraImg, image_id, cameraKey
+
+
+
+
+
+
+
