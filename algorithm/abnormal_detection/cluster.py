@@ -1,11 +1,8 @@
-import cv2
 import time
 import pyaudio
 import wave
 from numpy import *
 import numpy as np
-from utils.image_base64 import image_to_base64
-
 
 def alarming(wav_path):
 
@@ -93,7 +90,7 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
     :returns [
               clusters_info: 当前帧人脸信息更新起止时间后的信息
               flag: 是否报警的标志位，False代表未报警，True代表报警
-              base64_data: 异常图片的base64编码，如果报警（flag为True）, 将参数cameraImg转成base64格式的编码返回，否则为''
+              cameraImg: 摄像头读取的当前帧的图片
               image_id: 图片编号，如果报警（flag为True）, 生成以时间戳编码的图片编号, 否则为0
               cameraKey: 摄像头编号
             ]
@@ -101,7 +98,6 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
 
     flag = False
     image_id = 0
-    base64_data = ''
 
     clusters = list()
     if before_last_time_cluster == []:
@@ -140,7 +136,7 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
                 c.append([first_appear_time, final_disappear_time, embs, box_center])
                 clusters.append(c)
 
-        return clusters
+        return clusters, False, None, None, None
     else:
 
         for people in all_people:
@@ -216,10 +212,6 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
                         # 报警，标志位变True
                         flag = True
 
-                        # 图片转base64
-                        cv2.imwrite('cluster_image.jpg', cameraImg)
-                        base64_data = image_to_base64('cluster_image.jpg')
-
                         # image_id: 时间戳到秒
                         image_id = str(int(time.time()))
 
@@ -250,4 +242,4 @@ def box_cluster(cameraImg, before_last_time_cluster, all_people, cameraKey):
             if before_count == len(before_last_time_cluster):
                 clusters_info.append(cluster)
 
-        return clusters_info, flag, base64_data, image_id, cameraKey
+        return clusters_info, flag, cameraImg, image_id, cameraKey

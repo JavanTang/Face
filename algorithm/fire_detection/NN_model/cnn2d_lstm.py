@@ -2,8 +2,8 @@ import logging
 import tensorflow as tf
 from easydict import EasyDict
 from tensorflow.contrib import rnn
-from NN_model.libs import Model_skeleton, log_tensor_info
-from smoke_detection_core.motion_detection import motion_detector_factory
+from algorithm.fire_detection.NN_model.libs import Model_skeleton, log_tensor_info
+from algorithm.fire_detection.smoke_detection_core.motion_detection import motion_detector_factory
 
 def Cnn2d_lstm_conf():
     hparams = EasyDict()

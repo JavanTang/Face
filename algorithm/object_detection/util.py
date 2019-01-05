@@ -4,8 +4,9 @@ import cv2
 import torch
 import numpy as np
 import torch.nn as nn
-from bbox import bbox_iou
 from torch.autograd import Variable
+from algorithm.object_detection.bbox import bbox_iou
+
 
 
 def count_parameters(model):

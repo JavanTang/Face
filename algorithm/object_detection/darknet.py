@@ -5,9 +5,9 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from util import predict_transform
-from util import convert2cpu as cpu
 from torch.autograd import Variable
+from algorithm.object_detection.util import predict_transform
+from algorithm.object_detection.util import convert2cpu as cpu
 
 
 class test_net(nn.Module):

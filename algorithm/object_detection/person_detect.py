@@ -3,10 +3,10 @@ import cv2
 import time
 import random
 import pickle as pkl
-from util import *
-from darknet import Darknet
-from preprocess import letterbox_image
-from configs import confidence, nms_thresh, cfg, weights, reso
+from algorithm.object_detection.util import *
+from algorithm.object_detection.darknet import Darknet
+from algorithm.object_detection.preprocess import letterbox_image
+from algorithm.object_detection.configs import confidence, nms_thresh, cfg, weights, reso
 
 
 class PersonDetect(object):

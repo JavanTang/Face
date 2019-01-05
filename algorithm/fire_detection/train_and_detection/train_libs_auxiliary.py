@@ -1,6 +1,6 @@
 from easydict import EasyDict
-from NN_model.factory_provider import hparams_factory, model_factory
-from data_prepare.configure_dataset import config_dataset
+from algorithm.fire_detection.NN_model.factory_provider import hparams_factory, model_factory
+from algorithm.fire_detection.data_prepare.configure_dataset import config_dataset
 
 def get_model_and_hparams(net_is_using):
 
