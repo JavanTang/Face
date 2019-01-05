@@ -45,6 +45,22 @@ class TestNode(unittest.TestCase):
         ret = recog.get()
         print(ret)
 
+    def test_stranger_recognizer(self):
+        recog = recognizer.RealTimeStrangerRecognizer(1)
+        recog.init_node()
+        frame = cv2.imread(os.path.join(
+            here, '../database/cache/test_picture.png'))
+
+        msg = recog.TOP(frame, '2', 'test')
+        recog.put(msg)
+        recog.set_test_option_on()
+        recog.run()
+
+        time.sleep(2)
+
+        ret = recog.get()
+        print(ret)
+
     def test_abnormal_detecter(self):
         abn_detecter = recognizer.AbnormalDetectionRecognizer()
         abn_detecter.init_node()

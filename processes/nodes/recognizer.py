@@ -5,9 +5,10 @@ import os
 import traceback
 
 from utils.decorator import UnitTestDecorator
+from utils.image_base64 import str_to_base64
 from algorithm import insightface
 from algorithm import abnormal_detection
-from processes.message import RecognizerMessage, CameraMessage, AbnormalDetectionMessage
+from processes.message import RecognizerMessage, CameraMessage, AbnormalDetectionMessage, StrangerMessage
 
 from . import BaseNode
 
@@ -21,7 +22,8 @@ class BaseRecognizer(BaseNode):
                   minsize,  # 最小人脸像素
                   threshold,  # 人脸识别相似度阈值
                   tag,  # tag
-                  gpu_ids  # 可用的gpu编号
+                  gpu_ids,  # 可用的gpu编号
+                  stranger_threshold=None,  # 陌生人识别阈值
                   ):
 
         self.engine_name = engine_name
@@ -30,9 +32,7 @@ class BaseRecognizer(BaseNode):
         self.threshold = threshold
         self.tag = tag
         self.gpu_ids = gpu_ids
-
-    TOP = CameraMessage  # 上游节点需要传递的消息类
-    BOTTOM = RecognizerMessage  # 下游节点需要传递的消息类
+        self.stranger_threshold = stranger_threshold
 
     def on_detect(self, channel_id, name):
         """
@@ -59,12 +59,20 @@ class BaseRecognizer(BaseNode):
 
             # TODO 这里运行时间长汇出错，这里判断一下
             try:
-                original_face_image, names, probabilities, boxes, points = engine.detect_recognize(
-                    frame, p_threshold=self.threshold, min_size=self.minsize)
+                if self.stranger_threshold is None:
+                    original_face_image, names, probabilities, _, _ = engine.detect_recognize(
+                        frame, p_threshold=self.threshold, min_size=self.minsize)
+                else:
+                    acquaintance, stranger = engine.detect_recognize_stranger(
+                        frame, self.threshold, self.stranger_threshold, self.minsize, stranger_id=str_to_base64(img_time))
+
+                    original_face_image, names, probabilities = acquaintance[
+                        'image_matrix'], acquaintance['names'], acquaintance['probabilities']
+                    stranger_face_image, stranger_names = stranger[
+                        'image_matrix'], stranger['names']
 
             except Exception:
                 print("Recogize error. Camera id: %s." % channel_id)
-                import traceback
                 traceback.print_exc()
                 continue
 
@@ -73,16 +81,23 @@ class BaseRecognizer(BaseNode):
                 self.on_detect(channel_id, name)
 
             # 照片中没有人脸的时候不往队列里存储
-            if len(names) > 0:
+            if len(names) > 0 and self.stranger_threshold is None:
                 msg = RecognizerMessage(
                     original_face_image, names, img_time, channel_id, tag)
                 self.q_out.put(msg)
 
+            if self.stranger_threshold is not None and (len(names) > 0 or len(stranger_names > 0)):
+                msg = StrangerMessage(stranger_face_image, stranger_names,
+                                      original_face_image, names, img_time, channel_id, tag)
+                self.q_out.put(msg)
 
 source_root = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..')
 
 
 class RealTimeRecognizer(BaseRecognizer):
+
+    TOP = CameraMessage  # 上游节点需要传递的消息类
+    BOTTOM = RecognizerMessage  # 下游节点需要传递的消息类
 
     default_params = {
         'engine_name': 'CosineSimilarityEngine',
@@ -103,6 +118,30 @@ class RealTimeRecognizer(BaseRecognizer):
         if not self.get_test_option():
             print("摄像头%s检测到%s" % (channel_id, name))
 
+class RealTimeStrangerRecognizer(BaseRecognizer):
+
+    TOP = CameraMessage  # 上游节点需要传递的消息类
+    BOTTOM = StrangerMessage  # 下游节点需要传递的消息类
+
+    default_params = {
+        'engine_name': 'CosineSimilarityEngine',
+        'face_database_path': os.path.join(source_root, 'database/origin'),
+        'minsize': 40,
+        'threshold': 0.5,
+        'tag': "RealTimeRecognizer",
+        'gpu_ids': [0],
+        'stranger_threshold': 0.3
+    }
+
+    def init_node(self, **kwargs):
+        params = self.default_params.copy()
+        params.update(kwargs)
+        super(RealTimeStrangerRecognizer, self).init_node(**params)
+
+    def on_detect(self, channel_id, name):
+        # 测试状况下不打印
+        if not self.get_test_option():
+            print("摄像头%s检测到%s" % (channel_id, name))
 
 @UnitTestDecorator
 class AbnormalDetectionRecognizer(BaseNode):

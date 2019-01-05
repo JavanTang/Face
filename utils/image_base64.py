@@ -73,3 +73,10 @@ def get_time_base64():
     encodestr = base64.b64encode(str(cur_time).encode('utf-8'))
 
     return encodestr
+
+
+def str_to_base64(obj):
+    """将字符串转化为base64
+    """
+    obj = str(obj)
+    return base64.b64encode(obj.encode('utf-8'))
