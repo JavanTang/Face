@@ -19,7 +19,9 @@ class HumanDetection(BaseNode):
         model, classes, colors = load_model()
 
         while True:
-
+            
+            if self.get_test_option() and self.q_in.qsize() == 0:
+                break
             # Get the message from Queue
             msg = self.q_in.get()
 
