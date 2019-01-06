@@ -383,11 +383,41 @@ class SVMClassificationEngine(BaseEngine):
             self.clf = pickle.load(f)
             f.close()
 
+    def draw_box_diagram(self):
+        # log_prob = self.clf.predict_log_proba(self.feature_matrix[:100])
+        # log_prob = np.max(log_prob, 1)
+
+        prob = self.clf.predict_proba(self.feature_matrix[:10])
+        prob = np.max(prob, 1)
+        y_hat = self.clf.predict(self.feature_matrix[:10])
+        equal = y_hat == self.labels[:10]
+        # log_prob = log_prob[equal]
+        prob = prob[equal]
+
+        means = np.mean(prob)
+        std = np.std(prob)
+
+        print("均值: %f." % means)
+        print("方差: %f." % std)
+
+        import pandas as pd
+        
+        import matplotlib.pyplot as plt
+        data = pd.DataFrame({
+            # "log_prob": log_prob,
+            "prob": prob
+        })
+
+        data.boxplot()
+        plt.ylabel("Probablity")
+        plt.xlabel("Type")
+        plt.show()
+
     def train_test(self, *args, **kwargs):
         super(SVMClassificationEngine, self).load_database(*args, **kwargs)
         self.feature_matrix = sklearn.preprocessing.normalize(
             self.feature_matrix.asnumpy())
-
+ 
         label2name = list()
         for n in self.index2name:
             if n not in label2name:
