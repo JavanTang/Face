@@ -114,7 +114,7 @@ class TestNode(unittest.TestCase):
         print(smoke_detector.q_out.qsize())
 
     def test_people_detection(self):
-        
+
         print(123123)
         people_detector = human.HumanDetection(1)
         people_detector.init_node()
@@ -127,4 +127,4 @@ class TestNode(unittest.TestCase):
         people_detector.set_test_option_on()
         people_detector._run_sigle_process(0)
 
-        print(people_detector.q_out.qsize())
+        assert people_detector.q_out.qsize() == 5

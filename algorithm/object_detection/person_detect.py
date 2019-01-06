@@ -68,7 +68,6 @@ def write(x, img, classes, colors):
     if label == 'person':
         color = random.choice(colors)
         cv2.rectangle(img, c1, c2, color, 1)
-        cv2.imwrite('1.jpg', img)
         return img
     else:
         None
