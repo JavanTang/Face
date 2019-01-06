@@ -5,9 +5,6 @@
 根据计算人脸向量相似度算法的不同，该模块目前实现了三个Engine。
 
 
-相关资料:
-1. [python 进程共享变量](https://www.google.com/search?q=python+%E8%BF%9B%E7%A8%8B%E5%85%B1%E4%BA%AB%E5%8F%98%E9%87%8F&oq=%E8%BF%9B%E7%A8%8B%E5%85%B1%E4%BA%AB&aqs=chrome.1.69i57j0l5.4947j0j7&sourceid=chrome&ie=UTF-8)
-
 ##### CosineSimilarityEngine
 使用暴力计算（brute force）。算法复杂度o(n*m)
 ```py
@@ -37,8 +34,20 @@ frame = cv2.imread('your_img.jpg')
 original_face_image, names, probabilities, boxes, points = engine.detect_recognize(frame, p_threshold=self.threshold, min_size=self.minsize)
 ```
 
-##### NearestNeighborsEngine (待完成)
-使用sklean基于ball_tree, kd_tree的算法计算最相近的人脸 平均算法复杂度 o(m*log(n))
+##### NearestNeighborsEngine
+使用sklearn 近邻算法计算最相似的人脸。（内部使用ball-tree，kdtree）
+```py
+import cv2
+from insightface import NearestNeighborsEngine
+
+engine = CosineSimilarityEngine(gpu_id=0)
+engine.load_database('../database/origin', True)
+
+frame = cv2.imread('your_img.jpg')
+original_face_image, names, probabilities, boxes, points = engine.detect_recognize(frame, p_threshold=self.threshold, min_size=self.minsize)
+```
+
+##### SVMClassificationEngine (待完成，暂时不可用)
 
 ## 其他功能
 ##### 可视化识别结果
