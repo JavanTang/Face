@@ -4,12 +4,10 @@ import cv2
 import time
 
 from processes.message import CameraMessage
-from utils.decorator import UnitTestDecorator
 
 from . import BaseNode
 
 
-@UnitTestDecorator
 class CameraReader(BaseNode):
 
     BOTTOM = CameraMessage

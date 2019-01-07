@@ -11,7 +11,10 @@ source_path = os.path.join(here, '../..')
 if source_path not in sys.path:
     sys.path.append(source_path)
 
+from utils.decorator import UnitTestDecorator
+
 # TODO add join method
+@UnitTestDecorator
 class BaseNode(object):
     '''
     系统节点

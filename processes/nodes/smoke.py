@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-from utils.decorator import UnitTestDecorator
 
 from algorithm import fire_detection
 from processes.message import AbnormalDetectionMessage, CameraMessage
@@ -8,7 +7,6 @@ from processes.message import AbnormalDetectionMessage, CameraMessage
 from . import BaseNode
 
 
-@UnitTestDecorator
 class SmokeDetection(BaseNode):
 
     TOP = CameraMessage  # 上游节点需要传递的消息类

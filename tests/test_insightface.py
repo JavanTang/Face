@@ -46,14 +46,9 @@ class TestInsightFace(unittest.TestCase):
     def test_svm_engine(self):
         svm_engine = insightface.SVMClassificationEngine(0)
         svm_engine.load_database(self.muti_face_database_path)
-        # score = svm_engine.train_test(self.muti_face_database_path)
-        # print(score)
-
-        svm_engine.draw_box_diagram()
-
-if __name__ == "__main__":
-    svm_engine = insightface.SVMClassificationEngine(0)
-    svm_engine.load_database(os.path.join(
-            source_path, "database/old"))
         
-    svm_engine.draw_box_diagram()
+        for _ in range(10):
+            _, names, p, _, _ = svm_engine.detect_recognize(
+                self.test_image)
+            print(names)
+            pass

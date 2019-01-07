@@ -5,7 +5,6 @@ import os
 import traceback
 import multiprocessing
 
-from utils.decorator import UnitTestDecorator
 from utils.image_base64 import str_to_base64
 from algorithm import insightface
 from algorithm import abnormal_detection
@@ -15,7 +14,6 @@ from processes.message import RecognizerMessage, CameraMessage, AbnormalDetectio
 from . import BaseNode
 
 
-@UnitTestDecorator
 class BaseRecognizer(BaseNode):
 
     def init_node(self,
@@ -213,7 +211,6 @@ class AttentionRecognizer(BaseRecognizer):
                 self.q_out.put(msg)
 
 
-@UnitTestDecorator
 class AbnormalDetectionRecognizer(BaseNode):
 
     TOP = CameraMessage  # 上游节点需要传递的消息类

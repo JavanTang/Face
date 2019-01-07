@@ -1,4 +1,3 @@
-from utils.decorator import UnitTestDecorator
 from processes.message import HumanDetectionMessage, CameraMessage
 
 from algorithm.object_detection.person_detect import detect_person, load_model
@@ -6,7 +5,6 @@ from algorithm.object_detection.person_detect import detect_person, load_model
 from . import BaseNode
 
 
-@UnitTestDecorator
 class HumanDetection(BaseNode):
     TOP = CameraMessage
     BOTTOM = HumanDetectionMessage
