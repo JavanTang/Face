@@ -128,3 +128,18 @@ class TestNode(unittest.TestCase):
         people_detector._run_sigle_process(0)
 
         assert people_detector.q_out.qsize() == 5
+
+    def test_attention_detection(self):
+
+        attn_dtc = recognizer.AttentionRecognizer(1)
+        attn_dtc.init_node()
+        for i in range(5):
+            frame = cv2.imread(os.path.join(
+                here, '../database/cache/test_picture.png'))
+            msg = attn_dtc.TOP(frame, '2', 'test')
+            attn_dtc.put(msg)
+
+        attn_dtc.set_test_option_on()
+        attn_dtc.run()
+
+        assert attn_dtc.q_out.qsize() == 5
