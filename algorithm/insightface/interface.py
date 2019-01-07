@@ -136,7 +136,7 @@ class BaseEngine(object):
             p_filter = probabilities > p_threshold
             probabilities = probabilities[p_filter]
             boxes = boxes[p_filter]
-            points = [p for p, flag in zip(points, p_filter) if flag]
+            points = np.concatenate([p for p, flag in zip(points, p_filter) if flag])
             names = [n for n, flag in zip(names, p_filter) if flag]
 
         for box in boxes:
