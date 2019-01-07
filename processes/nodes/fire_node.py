@@ -1,13 +1,8 @@
 '''
 @Author: TangZhiFeng
 @Data: 2019-01-05
-<<<<<<< HEAD
-@LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-07 22:24:17
-=======
-@LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-07 22:33:23
->>>>>>> 4570cbcb602f1f400dbbcaccb76f24bbcaad70e9
+@LastEditors: Please set LastEditors
+@LastEditTime: 2019-01-07 22:39:30
 @Description: 火焰检测——NODE
 '''
 
@@ -21,7 +16,6 @@ from . import BaseNode
 
 
 
-@UnitTestDecorator
 class FlameDiffNode(BaseNode):
 
     TOP = CameraMessage

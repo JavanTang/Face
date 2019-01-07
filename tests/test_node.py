@@ -15,6 +15,7 @@ from processes.nodes import recognizer
 from processes.nodes import diff_node
 from processes.nodes import smoke
 from processes.nodes import human
+from processes.nodes import fire_node
 
 
 class TestNode(unittest.TestCase):
@@ -143,3 +144,17 @@ class TestNode(unittest.TestCase):
         attn_dtc._run_sigle_process(0)
 
         assert attn_dtc.q_out.qsize() == 5
+
+    def test_fire_detection(self):
+        engine = fire_node.FlameDiffNode()
+        engine.init_node()
+        for i in range(5):
+            frame = cv2.imread(os.path.join(
+                here, '../database/cache/fire.jpg'))
+            msg = engine.TOP(frame, '2', 'test')
+            engine.put(msg)
+
+        engine.set_test_option_on()
+        engine._run_sigle_process(0)
+
+        assert engine.q_out.qsize() == 5
