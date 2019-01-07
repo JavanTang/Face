@@ -2,7 +2,7 @@
 @Author: TangZhiFeng
 @Data: 2019-01-06
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-07 18:18:04
+@LastEditTime: 2019-01-07 18:47:06
 @Description: 专注度识别
 '''
 import numpy as np
@@ -31,8 +31,10 @@ class Forcus(object):
             names {list} -- 识别人员id的list
             box {numpy.array} -- 人员的
         '''
-
-        last = self.camera2box[camera_id]
+        if not camera_id in self.camera2box:
+            last = {}
+        else:
+            last = self.camera2box[camera_id]
         box = points.reshape(-1, 5, 2)
         # 这里是把数据进行更新
         updata = last
@@ -70,18 +72,34 @@ class Forcus(object):
         return result
 
     def __calculation(self, current, last, names):
+        '''计算专注度
+        
+        Arguments:
+            current {dict} -- 当前的对应数据
+            last {dict} -- 历史对应的数据
+            names {list} -- 人员list信息
+        
+        Returns:
+            list -- 人员list的对应信息
+        '''
+
         _forcus = []
         for name in names:
             if name in last:
-                box_current = current[name]
-                box_last = last[name]
+                box_current = current[name]['box']
+                box_last = last[name]['box']
+                # 获取左眼到右眼加上左眼到左嘴的距离
                 current_mouth_eye_dis = self.__point_distance(
                     box_current[0], box_current[1]) + self.__point_distance(box_current[0], box_current[3])
                 last_mouth_eye_dis = self.__point_distance(box_last[0], box_last[1]) + self.__point_distance(box_last[0], box_last[3])
+                # 获取比例
                 zoom = last_mouth_eye_dis / current_mouth_eye_dis
+                # 进行缩放并返回距离
                 point_point_dis = self.__point_distance(box_current * zoom, box_last)
                 move_proportion = point_point_dis / last_mouth_eye_dis
                 print('name:'+name+';focus:'+str(move_proportion))
                 _forcus.append(move_proportion)
+            else:
+                _forcus.append(5)
         # TODO 这里要把_forcus进行处理
         return _forcus
