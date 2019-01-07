@@ -3,11 +3,13 @@
 import time
 import os
 import traceback
+import multiprocessing
 
 from utils.decorator import UnitTestDecorator
 from utils.image_base64 import str_to_base64
 from algorithm import insightface
 from algorithm import abnormal_detection
+from algorithm import focus
 from processes.message import RecognizerMessage, CameraMessage, AbnormalDetectionMessage, StrangerMessage, AttentionMessage
 
 from . import BaseNode
@@ -91,6 +93,7 @@ class BaseRecognizer(BaseNode):
                                       original_face_image, names, img_time, channel_id, tag)
                 self.q_out.put(msg)
 
+
 source_root = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../..')
 
 
@@ -118,6 +121,7 @@ class RealTimeRecognizer(BaseRecognizer):
         if not self.get_test_option():
             print("摄像头%s检测到%s" % (channel_id, name))
 
+
 class RealTimeStrangerRecognizer(BaseRecognizer):
 
     TOP = CameraMessage  # 上游节点需要传递的消息类
@@ -144,6 +148,8 @@ class RealTimeStrangerRecognizer(BaseRecognizer):
             print("摄像头%s检测到%s" % (channel_id, name))
 
 # TODO merge with BaseRecognizer
+
+
 class AttentionRecognizer(BaseRecognizer):
     TOP = CameraMessage  # 上游节点需要传递的消息类
     BOTTOM = AttentionMessage  # 下游节点需要传递的消息类
@@ -157,18 +163,24 @@ class AttentionRecognizer(BaseRecognizer):
         'gpu_ids': [0]
     }
 
+    def __init__(self, process_size=1, queue_type="ProcessingQueue"):
+        super(AttentionRecognizer, self).__init__(process_size, queue_type)
+        self.lock = multiprocessing.Lock()
+        self.mp_dict = multiprocessing.Manager().dict()
+
     def init_node(self, **kwargs):
         params = self.default_params.copy()
         params.update(kwargs)
         super(AttentionRecognizer, self).init_node(**params)
 
-    
     def _run_sigle_process(self, i):
         print("Recognization node has been started.")
 
         gpu_id = self.gpu_ids[i % len(self.gpu_ids)]
         engine = getattr(insightface, self.engine_name)(gpu_id=gpu_id)
         engine.load_database(self.face_database_path)
+
+        attn_detect = focus.Forcus(self.mp_dict, self.lock)
 
         while True:
             # 如果当前模式为单元测试模式并且队列为空则程序返回， 此处不影响程序正常运行
@@ -184,7 +196,7 @@ class AttentionRecognizer(BaseRecognizer):
             try:
 
                 original_face_image, names, _, _, points = engine.detect_recognize(
-                        frame, p_threshold=self.threshold, min_size=self.minsize)
+                    frame, p_threshold=self.threshold, min_size=self.minsize)
 
             except Exception:
                 print("Recogize error. Camera id: %s." % channel_id)
@@ -192,7 +204,7 @@ class AttentionRecognizer(BaseRecognizer):
                 continue
 
             # TODO algorithm are not completed, create fake data here
-            score = [1 for i in range(len(names))]
+            score = attn_detect.get_forcus(channel_id, names, points)
 
             # 照片中没有人脸的时候不往队列里存储
             if len(names) > 0:
@@ -268,7 +280,7 @@ class AbnormalDetectionRecognizer(BaseNode):
             msg = self.q_in.get()
             frame, channel_id, _ = msg.image, msg.channel_id, msg.record_time
             try:
-                scaled_images, boxes, _,flag = engine.model.get_input(frame)
+                scaled_images, boxes, _, flag = engine.model.get_input(frame)
                 if not flag:
                     continue
                 mx_image_tensor = engine.model.get_feature_tensor(

@@ -140,6 +140,6 @@ class TestNode(unittest.TestCase):
             attn_dtc.put(msg)
 
         attn_dtc.set_test_option_on()
-        attn_dtc.run()
+        attn_dtc._run_sigle_process(0)
 
         assert attn_dtc.q_out.qsize() == 5
