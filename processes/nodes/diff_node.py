@@ -1,14 +1,12 @@
 import time
 import os
 
-from utils.decorator import UnitTestDecorator
 from processes.message import CameraMessage
 from algorithm import interframe_difference
 
 from . import BaseNode
 
 
-@UnitTestDecorator
 class FrameDiffNode(BaseNode):
     TOP = CameraMessage
     BOTTOM = CameraMessage

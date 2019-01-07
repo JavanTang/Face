@@ -1,22 +1,20 @@
 '''
 @Author: TangZhiFeng
 @Data: 2019-01-05
-@LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-05 21:22:15
+@LastEditors: Please set LastEditors
+@LastEditTime: 2019-01-07 19:25:44
 @Description: 火焰检测——NODE
 '''
 
 import time
 import os
 
-from utils.decorator import UnitTestDecorator
 from processes.message import CameraMessage
 from processes.message import AbnormalDetectionMessage
 from algorithm.fire_discover.interface import FireEngine
 from . import BaseNode
 
 
-@UnitTestDecorator
 class FrameDiffNode(BaseNode):
     TOP = CameraMessage
     BOTTOM = AbnormalDetectionMessage
