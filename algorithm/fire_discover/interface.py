@@ -2,16 +2,17 @@
 @Author: TangZhiFeng
 @Data: 2019-01-04
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-05 09:30:54
+@LastEditTime: 2019-01-07 21:56:30
 @Description: 火焰检测的接口 
 '''
 import os
 import sys
-current = os.path.dirname(__name__)
+current = os.path.dirname(__file__)
 project = os.path.dirname(os.path.dirname(current))
 sys.path.append(project)
 import cv2
-from .firenet import construct_firenet
+import numpy as np
+from .firenet import model
 
 
 
@@ -27,7 +28,10 @@ class FireParam(object):
 class FireEngine(object):
 
     def __init__(self):
-        self.model = construct_firenet(FireParam.network_rows, FireParam.network_cols)
+        # self.model = construct_firenet(FireParam.network_rows, FireParam.network_cols)
+        # self.model.load(os.path.join(current, "models/FireNet",
+        #                              "firenet"), weights_only=True)
+        self.model = model
 
     def load_model(self):
         '''加载模型
@@ -48,5 +52,6 @@ class FireEngine(object):
 
         small_frame = cv2.resize(
             frame, (FireParam.network_rows, FireParam.network_cols), cv2.INTER_AREA)
+        output = self.model.predict([small_frame])
 
-        return round(self.model.predict([small_frame]))[0][0] == 1
+        return round(output[0][0]) == 1

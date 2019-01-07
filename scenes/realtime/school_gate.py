@@ -4,7 +4,7 @@
 @Author: TangZhiFeng
 @Data: 2019-01-04
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-05 16:24:08
+@LastEditTime: 2019-01-07 19:49:45
 @Description: 实时识别场景,出入校
 '''
 
@@ -20,7 +20,7 @@ from utils.image_base64 import array_to_file
 from processes.nodes.diff_node import FrameDiffNode
 from processes.nodes.recorder import CameraReader
 from scenes import BaseEngineering, BaseScenesManage
-from processes.nodes.recognizer import RealTimeRecognizer
+from processes.nodes.recognizer import RealTimeRecognizer,RealTimeStrangerRecognizer
 from utils.time_utils import genera_stamp
 from utils.socket_client import client
 from utils.upload_image import batch_people_upload
@@ -34,6 +34,8 @@ class RealTimeSchoolGateEngineering(BaseEngineering):
         super(RealTimeSchoolGateEngineering, self).__init__(real_time)
 
     def build_data(self, i, data):
+        print('收到数据')
+        print(type(data))
         return data
 
     def generater(self, data):
@@ -78,7 +80,7 @@ class RealTimeSchoolGateScene(BaseScenesManage):
 
     def init_node(self):
         camera = CameraReader()
-        real_time_rec = RealTimeRecognizer(4)
+        real_time_rec = (4)
         diff = FrameDiffNode(1)
         diff.init_node()
         camera_ip = ['rtsp://admin:admin12345@192.168.0.52:554/Streaming/Channels/101', 'rtsp://admin:sdkj123456@192.168.0.64:554/Streaming/Channels/101',
@@ -88,7 +90,6 @@ class RealTimeSchoolGateScene(BaseScenesManage):
         real_time_rec.init_node()
         self.nodes.append(camera)
         self.nodes.append(diff)
-
         self.nodes.append(real_time_rec)
         self.manage = RealTimeSchoolGateEngineering()
 
