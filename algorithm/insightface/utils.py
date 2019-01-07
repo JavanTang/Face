@@ -8,7 +8,7 @@ import mxnet as mx
 import sys
 
 
-def load_dataset(path, model, force_reload=False, save_intermediate_result=True):
+def load_dataset(path, model, force_reload=False, save_intermediate_result=True, suffix='jpg'):
     """从数据文件夹中加载数据
 
     Args:
@@ -49,13 +49,13 @@ def load_dataset(path, model, force_reload=False, save_intermediate_result=True)
             continue
         else:
             image_files = glob.iglob(
-                os.path.join(path, category, '*.jpg'))
+                os.path.join(path, category, '*.' + suffix))
             image_list = []
             error_this_category = []
             for image_file in image_files:  # 遍历类别下的所有照片
                 img = cv2.imread(image_file)
                 img = cv2.resize(img, (720, 720))
-                img, boxes, flag = model.get_input(img)
+                img, boxes, _, flag = model.get_input(img)
 
                 # 照片中没有检测到人脸，或者检测到两张人脸，跳过该照片并记录错误信息
                 if flag == False:
@@ -103,6 +103,9 @@ def load_dataset(path, model, force_reload=False, save_intermediate_result=True)
         feature_list.append(images)
         index2name.extend([name] * images.shape[0])
 
+    if len(feature_list) == 0:
+        raise Exception("There is no face in this folder. Please check your datasets.")
+        
     # 将特征矩阵库加载到MXnet
     feature_matrix = np.concatenate(feature_list)
 
