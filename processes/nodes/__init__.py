@@ -11,7 +11,7 @@ source_path = os.path.join(here, '../..')
 if source_path not in sys.path:
     sys.path.append(source_path)
 
-
+# TODO add join method
 class BaseNode(object):
     '''
     系统节点

@@ -55,6 +55,16 @@ class StrangerMessage(RecognizerMessage):
         return "Stranger number: %s\n" % len(self.stranger_matrix) + super(StrangerMessage, self).__str__()
 
 
+class AttentionMessage(RecognizerMessage):
+    """
+    传递人脸专注度值的message
+    """
+
+    def __init__(self, score, *args, **kwargs):
+        super(AttentionMessage, self).__init__(*args, **kwargs)
+        self.score = score
+
+
 class AbnormalDetectionMessage(object):
     """Wrap message transfer from abnormal recognizer to root management node
     """
@@ -74,6 +84,7 @@ class AbnormalDetectionMessage(object):
 
     def __str__(self):
         return "Camera Key: %s detect %s situation. flag: %s." % (self.camera_key, self.abnormal_type, self.flag)
+
 
 class HumanDetectionMessage(object):
     """Wrap message transfer from human detection to root management node
