@@ -52,7 +52,7 @@ class BaseEngine(object):
         self.index2name = []
         self.feature_matrix = None
 
-    def load_database(self, path, force_reload=False, save_intermediate_result=True):
+    def load_database(self, path, force_reload=False, save_intermediate_result=True, suffix='jpg'):
         """加载人脸库
 
         Args:
@@ -61,7 +61,7 @@ class BaseEngine(object):
             save_intermediate_result (bool, optional): Defaults to False. 是否保存生成的向量到embedding_matrix.npy。保存生成的向量可以提高下次加载模型的速度
         """
         self.feature_matrix, self.index2name, _ = load_dataset(
-            path, self.model, force_reload=force_reload, save_intermediate_result=save_intermediate_result)
+            path, self.model, force_reload=force_reload, save_intermediate_result=save_intermediate_result, suffix=suffix)
 
         # 将特征矩阵库加载到MXnet
         self.feature_matrix = mx.nd.array(
