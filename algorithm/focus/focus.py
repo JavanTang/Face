@@ -2,7 +2,7 @@
 @Author: TangZhiFeng
 @Data: 2019-01-06
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-07 19:14:40
+@LastEditTime: 2019-01-07 19:25:33
 @Description: 专注度识别
 '''
 import numpy as np
@@ -43,17 +43,17 @@ class Forcus(object):
             name = names[i]
             # 这里会记录每一次的更新时间
             if name in updata:
-                updata[name]['updata_time'] = time.time()
+                updata[name]['update_time'] = time.time()
                 updata[name]['box'] = box[i]
             else:
                 updata[name] = {}
-                updata[name]['updata_time'] = time.time()
+                updata[name]['update_time'] = time.time()
                 updata[name]['box'] = box[i]
         # 更新的时候加上锁，确保进程安全
         self.look.acquire()
         self.camera2box[camera_id] = updata
         self.look.release()
-        current = {name[i]: {'box': points[i], 'update_time':time.time()} for i in range(len(names))}
+        current = {names[i]: {'box': box[i], 'update_time':time.time()} for i in range(len(names))}
         _result = self.__calculation(current, last, names)
         return _result
 
@@ -91,6 +91,8 @@ class Forcus(object):
                 if time.time() - last[name]['update_time'] < 20:
                     box_current = current[name]['box']
                     box_last = last[name]['box']
+                    print(box_current)
+                    print(box_last)
                     # 获取左眼到右眼加上左眼到左嘴的距离
                     current_mouth_eye_dis = self.__point_distance(
                         box_current[0], box_current[1]) + self.__point_distance(box_current[0], box_current[3])
