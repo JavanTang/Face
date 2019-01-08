@@ -1,8 +1,8 @@
 '''
 @Author: TangZhiFeng
 @Data: 2019-01-06
-@LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-07 19:25:33
+@LastEditors: Please set LastEditors
+@LastEditTime: 2019-01-08 13:47:16
 @Description: 专注度识别
 '''
 import numpy as np
@@ -13,7 +13,7 @@ class Forcus(object):
     '''这是一个进程的专注度
     '''
 
-    def __init__(self, camera2box, look):
+    def __init__(self, camera2box):
         '''初始化
 
         Arguments:
@@ -22,7 +22,6 @@ class Forcus(object):
         '''
 
         self.camera2box = camera2box
-        self.look = look
 
     def get_forcus(self, camera_id, names, points):
         '''获取专注度
@@ -50,9 +49,7 @@ class Forcus(object):
                 updata[name]['update_time'] = time.time()
                 updata[name]['box'] = box[i]
         # 更新的时候加上锁，确保进程安全
-        self.look.acquire()
         self.camera2box[camera_id] = updata
-        self.look.release()
         current = {names[i]: {'box': box[i], 'update_time':time.time()} for i in range(len(names))}
         _result = self.__calculation(current, last, names)
         return _result

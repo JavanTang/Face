@@ -163,7 +163,6 @@ class AttentionRecognizer(BaseRecognizer):
 
     def __init__(self, process_size=1, queue_type="ProcessingQueue"):
         super(AttentionRecognizer, self).__init__(process_size, queue_type)
-        self.lock = multiprocessing.Lock()
         self.mp_dict = multiprocessing.Manager().dict()
 
     def init_node(self, **kwargs):
@@ -178,7 +177,7 @@ class AttentionRecognizer(BaseRecognizer):
         engine = getattr(insightface, self.engine_name)(gpu_id=gpu_id)
         engine.load_database(self.face_database_path)
 
-        attn_detect = focus.Forcus(self.mp_dict, self.lock)
+        attn_detect = focus.Forcus(self.mp_dict)
 
         while True:
             # 如果当前模式为单元测试模式并且队列为空则程序返回， 此处不影响程序正常运行
