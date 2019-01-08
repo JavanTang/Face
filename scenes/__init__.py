@@ -1,9 +1,10 @@
+from utils.socket_client import Client
 '''
 @Author: TangZhiFeng
 @Data: 2018-12-28
 @LastEditors: TangZhiFeng
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-05 16:10:52
+@LastEditTime: 2019-01-08 16:34:11
 '''
 import queue
 import os
@@ -16,9 +17,9 @@ current = os.path.dirname(__name__)
 project = os.path.dirname(current)
 
 sys.path.append(project)
-from utils.socket_client import Client
 
 client = Client('')
+
 
 class BaseEngineering(object):
     '''应用工程视频类算法基类
@@ -71,7 +72,8 @@ class BaseEngineering(object):
         '''
         # 当self.algorithems[i]为list的时候，就代表需要并行运行，所谓的并行运行的本质就是
         # 将数据喂给这一层每一个算法模块。
-        if isinstance(self.algorithems[i],list):
+        # print(data)
+        if isinstance(self.algorithems[i], list):
             for child_algorithem in self.algorithems[i]:
                 child_algorithem.put(data)
         else:
@@ -99,13 +101,17 @@ class BaseEngineering(object):
         '''开始运行，运行方式是监听每一个算法的返回，用线程的方式。
         '''
         print('listen starting...')
-
+        # TODO 并行问题 
         def listen(index, algorithms_obj):
             while True:
                 data = algorithms_obj.get()
                 self.algorithms_distribution(index+1, data)
         for i in range(len(self.algorithems)):
-            _thread.start_new_thread(listen, (i, self.algorithems[i],))
+            if isinstance(self.algorithems[i], list):
+                for node in self.algorithems[i]:
+                    _thread.start_new_thread(listen, (i, node,))
+            else:
+                _thread.start_new_thread(listen, (i, self.algorithems[i],))
         while True:
             pass
 
@@ -142,7 +148,6 @@ class BaseScenesManage(threading.Thread):
         assert not self.manage is None
         for node in self.nodes:
             self.manage.add_algorithems(node)
-            node.run()
         self.manage.run()
 
     def __init__(self):
