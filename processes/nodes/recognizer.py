@@ -9,7 +9,7 @@ from utils.image_base64 import str_to_base64
 from algorithm import insightface
 from algorithm import abnormal_detection
 from algorithm import focus
-from processes.message import RecognizerMessage, CameraMessage, AbnormalDetectionMessage, StrangerMessage, AttentionMessage
+from processes.message import RecognizerMessage, CameraMessage, AbnormalDetectionMessage, StrangerMessage, AttentionMessage, HumanDetectionMessage
 
 from . import BaseNode
 
@@ -293,3 +293,66 @@ class AbnormalDetectionRecognizer(BaseNode):
 
             except:
                 traceback.print_exc()
+
+
+class PeopleRecognizer(BaseRecognizer):
+
+    TOP = HumanDetectionMessage  # 上游节点需要传递的消息类
+    BOTTOM = StrangerMessage  # 下游节点需要传递的消息类
+
+    default_params = {
+        'engine_name': 'CosineSimilarityEngine',
+        'face_database_path': os.path.join(source_root, 'database/origin'),
+        'minsize': 40,
+        'threshold': 0.5,
+        'tag': "RealTimeRecognizer",
+        'gpu_ids': [0]
+    }
+
+    def __init__(self, process_size=1, queue_type="ProcessingQueue"):
+        super(PeopleRecognizer, self).__init__(process_size, queue_type)
+
+    def init_node(self, **kwargs):
+        params = self.default_params.copy()
+        params.update(kwargs)
+        super(PeopleRecognizer, self).init_node(**params)
+
+    def _run_sigle_process(self, i):
+        print("Recognization node has been started.")
+
+        gpu_id = self.gpu_ids[i % len(self.gpu_ids)]
+        engine = getattr(insightface, self.engine_name)(gpu_id=gpu_id)
+        engine.load_database(self.face_database_path)
+
+        while True:
+            # 如果当前模式为单元测试模式并且队列为空则程序返回， 此处不影响程序正常运行
+            if self.get_test_option() and self.q_in.qsize() == 0:
+                break
+
+            # Get the message from Queue
+            msg = self.q_in.get()
+
+            flag, image_matrix, image_id, channel_id = msg.flag, msg.image_matrix, msg.image_id, msg.camera_key
+
+            # TODO 这里运行时间长汇出错，这里判断一下
+            try:
+                acquaintance_names = []
+                stranger_names = []
+                acquaintance_images = []
+                stranger_images = []
+                for frame in image_matrix:
+                    _, names, _, _, _ = engine.detect_recognize(
+                        frame, p_threshold=self.threshold, min_size=self.minsize)
+                    if len(names) > 0:
+                        acquaintance_names.append(names[0])
+                        acquaintance_images.append(frame)
+                    else:
+                        stranger_names.append(str_to_base64(time.time()))
+                        stranger_images.append(frame)
+            except Exception:
+                print("Recogize error. Camera id: %s." % channel_id)
+                traceback.print_exc()
+                continue
+
+            msg = self.BOTTOM(stranger_images, stranger_names, acquaintance_images, acquaintance_names, time.time(), channel_id, self.__class__.__name__)
+            self.q_out.put(msg)

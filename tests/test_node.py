@@ -4,6 +4,7 @@ import unittest
 import time
 import cv2
 
+import numpy as np
 here = os.path.abspath(os.path.dirname(__file__))
 
 # 将所要测试的源码路径放入path下面
@@ -158,3 +159,25 @@ class TestNode(unittest.TestCase):
         engine._run_sigle_process(0)
 
         assert engine.q_out.qsize() == 5
+
+    def test_people_recognizer(self):
+
+        engine = recognizer.PeopleRecognizer()
+        engine.init_node()
+
+        image_matrix = []
+        for i in range(5):
+            frame = cv2.imread(os.path.join(
+                here, '../database/cache/person.jpg'))
+            image_matrix.append(frame)
+        
+        msg = engine.TOP(True, np.stack(image_matrix), '2', 'test')
+        engine.put(msg)
+
+        engine.set_test_option_on()
+        engine.run()
+
+        time.sleep(10)
+
+        if engine.q_out.qsize() > 0:
+            print(engine.get())
