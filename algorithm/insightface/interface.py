@@ -134,10 +134,13 @@ class BaseEngine(object):
         probabilities = np.array(probabilities)
         if p_threshold > -1:
             p_filter = probabilities > p_threshold
+            names = [n for n, flag in zip(names, p_filter) if flag]
+            if len(names) == 0:
+                return [], [], [], [], []
             probabilities = probabilities[p_filter]
             boxes = boxes[p_filter]
             points = np.concatenate([p for p, flag in zip(points, p_filter) if flag])
-            names = [n for n, flag in zip(names, p_filter) if flag]
+            
 
         for box in boxes:
             original_face_image.append(img[box[1]: box[3], box[0]: box[2]])
