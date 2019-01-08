@@ -116,3 +116,8 @@ dmypy.json
 
 .idea/
 .vscode/
+
+
+algorithm/insightface/models/model-r100-ii/model-0000.params
+algorithm/insightface/models/model-r34-amf/model-0000.params
+algorithm/object_detection/yolov3.weights
