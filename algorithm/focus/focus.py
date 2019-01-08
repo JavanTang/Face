@@ -1,8 +1,8 @@
 '''
 @Author: TangZhiFeng
 @Data: 2019-01-06
-@LastEditors: Please set LastEditors
-@LastEditTime: 2019-01-08 13:47:16
+@LastEditors: TangZhiFeng
+@LastEditTime: 2019-01-08 15:28:54
 @Description: 专注度识别
 '''
 import numpy as np
@@ -31,11 +31,21 @@ class Forcus(object):
             names {list} -- 识别人员id的list
             box {numpy.array} -- 人员的
         '''
+        # print('历史')
+        # print(self.camera2box)
+        # print('box')
+        # print(points)
+        _camera2box = self.camera2box.copy()
+        if isinstance(points, list):
+            return []
         if not camera_id in self.camera2box:
             last = {}
         else:
-            last = self.camera2box[camera_id]
+            last = _camera2box[camera_id]
         box = points.reshape(-1, 5, 2)
+        current = {names[i]: {'box': box[i], 'update_time': time.time()}
+                   for i in range(len(names))}
+        _result = self.__calculation(current, last, names)
         # 这里是把数据进行更新
         updata = last
         for i in range(len(names)):
@@ -50,8 +60,6 @@ class Forcus(object):
                 updata[name]['box'] = box[i]
         # 更新的时候加上锁，确保进程安全
         self.camera2box[camera_id] = updata
-        current = {names[i]: {'box': box[i], 'update_time':time.time()} for i in range(len(names))}
-        _result = self.__calculation(current, last, names)
         return _result
 
     def __point_distance(self, last_point, current_point):
@@ -66,7 +74,6 @@ class Forcus(object):
         '''
 
         result = np.linalg.norm(last_point-current_point)
-        print(result)
         return result
 
     def __calculation(self, current, last, names):
@@ -88,25 +95,35 @@ class Forcus(object):
                 if time.time() - last[name]['update_time'] < 20:
                     box_current = current[name]['box']
                     box_last = last[name]['box']
-                    print(box_current)
-                    print(box_last)
                     # 获取左眼到右眼加上左眼到左嘴的距离
                     current_mouth_eye_dis = self.__point_distance(
                         box_current[0], box_current[1]) + self.__point_distance(box_current[0], box_current[3])
                     last_mouth_eye_dis = self.__point_distance(
                         box_last[0], box_last[1]) + self.__point_distance(box_last[0], box_last[3])
+                    # print('当前距离：')
+                    # print(current_mouth_eye_dis)
+                    # print('上一次的距离：')
+                    # print(last_mouth_eye_dis)
                     # 获取比例
-                    zoom = last_mouth_eye_dis / current_mouth_eye_dis
+                    zoom = last_mouth_eye_dis*1.0 / current_mouth_eye_dis
+                    # print('缩放比例：')
+                    # print(zoom)
                     # 进行缩放并返回距离
                     point_point_dis = self.__point_distance(
                         box_current * zoom, box_last)
-                    move_proportion = point_point_dis / last_mouth_eye_dis
-                    print('name:'+name+';focus:'+str(move_proportion))
-                    _result = move_proportion
+                    # move_proportion = point_point_dis*1.0 / last_mouth_eye_dis
+                    # print(point_point_dis)
+                    # print(move_proportion)
+                    if point_point_dis <= 80:
+                        _result = 3
+                    elif point_point_dis <=200:
+                        _result = 2
+                    else:
+                        _result = 1
                 else:
-                    _result = 5
+                    _result = 3
             else:
-                _result = 5
+                _result = 3
             _forcus.append(_result)
         # TODO 这里要把_forcus进行处理
         return _forcus

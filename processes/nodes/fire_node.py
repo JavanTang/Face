@@ -2,7 +2,7 @@
 @Author: TangZhiFeng
 @Data: 2019-01-05
 @LastEditors: TangZhiFeng
-@LastEditTime: 2019-01-08 00:57:13
+@LastEditTime: 2019-01-08 11:33:22
 @Description: 火焰检测——NODE
 '''
 
@@ -32,7 +32,7 @@ class FlameDiffNode(BaseNode):
         fire = FireEngine()
 
         while(True):
-            print('-----------------')
+
             if self.get_test_option() and self.q_in.qsize() == 0:
                 break
             msg_in = self.q_in.get()
@@ -43,9 +43,7 @@ class FlameDiffNode(BaseNode):
                 print("%s bottom queue size is greater than 4." % self.__class__.__name__)
                 continue
             result = fire.predict(image)
-            
             if result:
-                print(result)
                 data = AbnormalDetectionMessage(
                     'flame',
                     True,
