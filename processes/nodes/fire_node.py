@@ -1,8 +1,8 @@
 '''
 @Author: TangZhiFeng
 @Data: 2019-01-05
-@LastEditors: Please set LastEditors
-@LastEditTime: 2019-01-07 22:39:30
+@LastEditors: TangZhiFeng
+@LastEditTime: 2019-01-08 00:57:13
 @Description: 火焰检测——NODE
 '''
 
@@ -15,9 +15,7 @@ from algorithm.fire_discover.interface import FireEngine
 from . import BaseNode
 
 
-
 class FlameDiffNode(BaseNode):
-
     TOP = CameraMessage
     BOTTOM = AbnormalDetectionMessage
 
@@ -26,10 +24,12 @@ class FlameDiffNode(BaseNode):
             process_size, queue_type)
 
     def init_node(self):
-        self.fire = FireEngine()
-
+        pass
+        
 
     def _run_sigle_process(self, i):
+        
+        fire = FireEngine()
 
         while(True):
             print('-----------------')
@@ -42,9 +42,10 @@ class FlameDiffNode(BaseNode):
             if self.q_out.qsize() > 4:
                 print("%s bottom queue size is greater than 4." % self.__class__.__name__)
                 continue
-            result = self.fire.predict(image)
-            print(result)
-            if result is True:
+            result = fire.predict(image)
+            
+            if result:
+                print(result)
                 data = AbnormalDetectionMessage(
                     'flame',
                     True,
