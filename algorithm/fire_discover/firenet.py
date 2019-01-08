@@ -63,15 +63,17 @@ def construct_firenet (x,y):
 ################################################################################
 
 # construct and display model
+def get_model():
 
-model = construct_firenet (224, 224)
-print("Constructed FireNet ...")
+    model = construct_firenet (224, 224)
+    print("Constructed FireNet ...")
 
-current = os.path.dirname(__file__)
+    current = os.path.dirname(__file__)
 
 
-model.load(os.path.join(current,"models/FireNet", "firenet"),weights_only=True)
-print("Loaded CNN network weights ...")
+    model.load(os.path.join(current,"models/FireNet", "firenet"),weights_only=True)
+    print("Loaded CNN network weights ...")
+    return model
 
 ################################################################################
 
